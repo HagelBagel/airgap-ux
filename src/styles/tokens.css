@@ -1,0 +1,99 @@
+/*
+ * Design Tokens — Sovereign JTBD
+ *
+ * Palette logic:
+ *   Forest Greens   → high-opportunity scores (> 15)
+ *   Sage Greens     → moderate-opportunity scores (10 – 15)
+ *   Slate Blue-Grey → low-priority / satisfied jobs (< 10)
+ *   Warm Ambers     → tension / speaker conflict
+ */
+
+:root {
+  /* ── Forest Green palette ──────────────────────────────────────────────── */
+  --c-forest-900: #081c15;
+  --c-forest-800: #1b4332;
+  --c-forest-700: #2d6a4f;
+  --c-forest-600: #40916c;
+  --c-forest-500: #52b788;
+  --c-forest-400: #74c69d;
+  --c-forest-200: #b7e4c7;
+  --c-forest-100: #d8f3dc;
+  --c-forest-50:  #f0faf4;
+
+  /* ── Amber (tension / warning) ─────────────────────────────────────────── */
+  --c-amber-700: #b45309;
+  --c-amber-500: #f59e0b;
+  --c-amber-200: #fde68a;
+  --c-amber-100: #fef3c7;
+
+  /* ── Slate (neutral) ───────────────────────────────────────────────────── */
+  --c-slate-900: #0f172a;
+  --c-slate-700: #334155;
+  --c-slate-600: #475569;
+  --c-slate-500: #64748b;
+  --c-slate-400: #94a3b8;
+  --c-slate-300: #cbd5e1;
+  --c-slate-200: #e2e8f0;
+  --c-slate-100: #f1f5f9;
+  --c-slate-50:  #f8fafc;
+  --c-white:     #ffffff;
+
+  /* ── Semantic surface roles ────────────────────────────────────────────── */
+  --color-bg:         var(--c-slate-50);
+  --color-surface:    var(--c-white);
+  --color-border:     var(--c-slate-200);
+  --color-text:       var(--c-slate-900);
+  --color-text-muted: var(--c-slate-500);
+  --color-accent:     var(--c-forest-700);
+  --color-accent-bg:  var(--c-forest-50);
+
+  /*
+   * Opportunity score heatmap defaults (low priority).
+   * Overridden per-card via .job-card--high / --mid / --low modifier classes.
+   */
+  --score-accent: var(--c-slate-400);
+  --score-bg:     var(--c-slate-100);
+  --score-text:   var(--c-slate-600);
+
+  /* ── Spacing (4-point base) ────────────────────────────────────────────── */
+  --space-1:  0.25rem;  /*  4px */
+  --space-2:  0.5rem;   /*  8px */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+
+  /* ── Border radii ──────────────────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* ── Typography ────────────────────────────────────────────────────────── */
+  --font-sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, 'Cascadia Code', monospace;
+
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  1.875rem;  /* 30px */
+
+  /* ── Shadows ───────────────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -1px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -2px rgb(0 0 0 / 0.03);
+
+  /* ── Motion ────────────────────────────────────────────────────────────── */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 400ms;
+}
