@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ProcessingStatus from './ProcessingStatus.vue'
 
 // Mock only necessary side-effect triggers
@@ -28,6 +28,10 @@ describe('ProcessingStatus - Critical Logic', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('calculates canExport correctly based on stage and cards', () => {

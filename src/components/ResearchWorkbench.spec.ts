@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import ResearchWorkbench from './ResearchWorkbench.vue'
 
 // Mock only necessary side-effect triggers
@@ -26,6 +26,10 @@ describe('ResearchWorkbench - Critical Logic', () => {
       toString: () => 'selected text',
       removeAllRanges: vi.fn()
     })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it('renders transcript blocks correctly', () => {
