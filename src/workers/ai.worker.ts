@@ -246,7 +246,7 @@ async function runStrategynAnalysis(
           LLM_BATCH_TIMEOUT_MS,
           `Extraction timed out for batch ${batchNumber}/${batches.length}`,
         )) as LlmOutput[];
-      } catch (_) {
+      } catch {
         console.warn(`Batch ${batchNumber} timed out, using fallback for this batch`);
         output = [];
       }
