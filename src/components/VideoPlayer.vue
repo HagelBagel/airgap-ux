@@ -5,11 +5,15 @@
       class="video-element"
       :src="src"         
           :muted="isMuted"
+      :style="{ height: videoHeight + 'px' }"
       @timeupdate="handleTimeUpdate"
       @loadedmetadata="handleLoadedMetadata"
       @canplay="handleCanPlay"
       @error="handleError"
     />
+    
+    <!-- Resize handle -->
+    <div class="resize-handle" @mousedown="startResize"></div>
     
     <div class="control-bar" >
       <button class="control-btn" @click="togglePlay">
@@ -53,6 +57,32 @@ const isPlaying = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)
 const isMuted = ref(false)
+
+// Video resizing state
+const videoHeight = ref(400) // Default height
+const MIN_HEIGHT = 200
+const MAX_HEIGHT = 800
+
+// Video resizing functions
+const startResize = (e: MouseEvent) => {
+  e.preventDefault()
+  const startY = e.clientY
+  const startHeight = videoHeight.value
+
+  const handleMouseMove = (e: MouseEvent) => {
+    const deltaY = e.clientY - startY
+    const newHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, startHeight + deltaY))
+    videoHeight.value = newHeight
+  }
+
+  const handleMouseUp = () => {
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+}
 
 const togglePlay = async () => {
   if (!videoElement.value) {
@@ -282,12 +312,39 @@ defineExpose({
   background: #1a1a1a;
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
 }
 
 .video-element {
   width: 100%;
-  max-height: 500px;
   display: block;
+  transition: height 0.2s ease;
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: linear-gradient(180deg, #666 0%, #888 50%, #666 100%);
+  cursor: ns-resize;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  border-top: 2px solid #999;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.resize-handle:hover {
+  opacity: 1;
+  background: linear-gradient(180deg, #777 0%, #999 50%, #777 100%);
+  border-top-color: #bbb;
+}
+
+.resize-handle:active {
+  opacity: 1;
+  background: linear-gradient(180deg, #555 0%, #777 50%, #555 100%);
+  border-top-color: #888;
 }
 
 .control-bar {
@@ -296,7 +353,7 @@ defineExpose({
   gap: 12px;
   padding: 16px;
   background: #2a2a2a;
-  border-top: 1px solid #3a3a3a;
+  border-top: 1px solid #444;
 }
 
 .control-btn {

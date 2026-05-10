@@ -66,7 +66,7 @@ const initializeWaveSurfer = () => {
     media: props.mediaElement ?? undefined,
     waveColor: '#d1d5db', // light gray
     progressColor: '#3b82f6', // distinct blue
-    height: 128,
+    height: 75,
     interact: true,
     barWidth: 2,
     barRadius: 3,
@@ -281,12 +281,12 @@ defineExpose({
   background: #1a1a1a;
   border-radius: 8px;
   overflow: hidden;
-  padding: 16px;
+  padding: 8px;
 }
 
 .waveform-container {
   width: 100%;
-  height: 128px;
+  height: 75px;
   background: #2a2a2a;
   border-radius: 4px;
   position: relative;
