@@ -7,13 +7,14 @@ const props = defineProps<{
 }>()
 
 const TASK_STAGES: Array<{ id: ProcessingStage; label: string }> = [
+  { id: 'audio-preprocessing', label: 'Audio Pre-processing' },
   { id: 'loading-models', label: 'Loading Models' },
   { id: 'transcribing', label: 'Transcribing' },
   { id: 'extracting', label: 'Analyzing Outcomes' },
   { id: 'scoring', label: 'Calculating Scores' },
 ]
 
-const STAGE_ORDER: ProcessingStage[] = ['loading-models', 'transcribing', 'extracting', 'scoring']
+const STAGE_ORDER: ProcessingStage[] = ['audio-preprocessing', 'loading-models', 'transcribing', 'extracting', 'scoring']
 
 const tasks = computed(() => {
   const currentIndex = STAGE_ORDER.indexOf(props.stage)
@@ -22,7 +23,9 @@ const tasks = computed(() => {
     const taskIndex = STAGE_ORDER.indexOf(task.id)
     let status: 'completed' | 'in-progress' | 'pending'
 
-    if (currentIndex === -1) {
+    if (props.stage === 'done') {
+      status = 'completed'
+    } else if (currentIndex === -1) {
       status = 'pending'
     } else if (taskIndex < currentIndex) {
       status = 'completed'

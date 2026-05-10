@@ -44,6 +44,7 @@ const progressPercent = computed(() => Math.round(props.loadProgress * 100))
 
 const statusLabel = computed<string>(() => {
   switch (props.stage) {
+    case 'audio-preprocessing': return 'Processing audio…'
     case 'loading-models': return 'Loading models…'
     case 'transcribing':   return 'Transcribing locally…'
     case 'extracting':     return 'Analyzing Outcomes…'
