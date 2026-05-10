@@ -24,7 +24,7 @@ const waveformRef = ref<InstanceType<typeof WaveformTimeline> | null>(null)
 const audioUrl = ref<string | null>(null)
 
 // ── Audio processing controls ───────────────────────────────────────────────────
-const audioGain = ref(1.5) // Default 50% boost
+// const audioGain = ref(1.5) // Default 50% boost
 
 // ── Derived UI state ──────────────────────────────────────────────────────────
 
@@ -166,19 +166,7 @@ function formatTime(seconds: number): string {
       </div>
       
       <div class="dashboard__controls">
-        <!-- Volume Control -->
-        <div class="volume-control">
-          <label class="volume-label">Volume:</label>
-          <input
-            type="range"
-            min="0.1"
-            max="3"
-            step="0.1"
-            v-model="audioGain"
-            class="volume-slider"
-          />
-          <span class="volume-value">{{ audioGain.toFixed(1) }}x</span>
-        </div>
+        
       </div>
       
       <div class="dashboard__actions">
@@ -403,67 +391,6 @@ function formatTime(seconds: number): string {
   text-transform: uppercase;
 }
 
-/* Volume Control Styles */
-.volume-control {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-}
-
-.volume-label {
-  color: var(--color-text);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.volume-slider {
-  width: 120px;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-
-.volume-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  background: var(--color-accent);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: transform var(--duration-fast);
-}
-
-.volume-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-}
-
-.volume-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: var(--color-accent);
-  border-radius: 50%;
-  cursor: pointer;
-  border: none;
-  transition: transform var(--duration-fast);
-}
-
-.volume-slider::-moz-range-thumb:hover {
-  transform: scale(1.1);
-}
-
-.volume-value {
-  color: var(--color-text-muted);
-  font-weight: 600;
-  min-width: 3ch;
-  text-align: right;
-}
 
 .dashboard__mock-dot {
   width: 7px;
