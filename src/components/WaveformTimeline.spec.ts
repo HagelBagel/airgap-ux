@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import WaveformTimeline from './WaveformTimeline.vue'
 
-const handlers: Record<string, ((value?: number) => void)[]> = {}
+const handlers: Record<string, ((_value?: number) => void)[]> = {}
 
 const mockWaveSurferCreate = vi.fn()
 
@@ -33,7 +33,7 @@ describe('WaveformTimeline media sync', () => {
       const media = config.media ?? null
 
       return {
-        on: (event: string, cb: (value?: number) => void) => {
+        on: (event: string, cb: (_value?: number) => void) => {
           handlers[event] ??= []
           handlers[event].push(cb)
         },
@@ -70,7 +70,7 @@ describe('WaveformTimeline media sync', () => {
     const createConfig = mockWaveSurferCreate.mock.calls[0][0] as { media?: HTMLMediaElement }
     expect(createConfig.media).toBe(video)
 
-    ;(wrapper.vm as unknown as { setCurrentTime: (time: number) => void }).setCurrentTime(30)
+    ;(wrapper.vm as unknown as { setCurrentTime: (_time: number) => void }).setCurrentTime(30)
 
     expect(video.currentTime).toBe(30)
 
