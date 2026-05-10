@@ -143,4 +143,49 @@ describe('ProcessingStatus - Critical Logic', () => {
     // Export buttons should not be visible when stage is not done
     expect((wrapper.vm as any).canExport).toBe(false)
   })
+
+  it('displays correct status label for audio-preprocessing stage', () => {
+    const wrapper = mount(ProcessingStatus, {
+      props: { 
+        stage: 'audio-preprocessing',
+        loadProgress: 0.3,
+        progressDetail: 'Processing audio file...',
+        usedFallback: false,
+        startedAt: 1234567890,
+        allowCalibrationLearning: true
+      }
+    })
+
+    expect((wrapper.vm as any).statusLabel).toBe('Processing audio…')
+  })
+
+  it('calculates isWorking correctly for audio-preprocessing stage', () => {
+    const wrapper = mount(ProcessingStatus, {
+      props: { 
+        stage: 'audio-preprocessing',
+        loadProgress: 0.3,
+        progressDetail: 'Processing audio file...',
+        usedFallback: false,
+        startedAt: 1234567890,
+        allowCalibrationLearning: true
+      }
+    })
+
+    expect((wrapper.vm as any).isWorking).toBe(true)
+  })
+
+  it('calculates isWorking as false for idle stage', () => {
+    const wrapper = mount(ProcessingStatus, {
+      props: { 
+        stage: 'idle',
+        loadProgress: 0,
+        progressDetail: '',
+        usedFallback: false,
+        startedAt: null,
+        allowCalibrationLearning: true
+      }
+    })
+
+    expect((wrapper.vm as any).isWorking).toBe(false)
+  })
 })
