@@ -191,3 +191,74 @@ Then move into that folder and run steps 2-7:
 ```powershell
 Set-Location sovereign-jtbd
 ```
+
+My apologies—I was over-complicating things. Here is a clear breakdown of the features and sub-tasks we’ve mapped out for your **JTBD/ODI Insight Workbench**, organized by functional area.
+
+### 1. Audio Pre-processing Pipeline
+
+* **Web Audio API Service:**
+* Implement `OfflineAudioContext` for fast, background processing.
+* **High-Pass Filter:** Set to 80Hz to remove low-frequency background rumble.
+* **Dynamics Compressor:** Normalize audio levels (Threshold -24dB, Ratio 12) to make speech consistent.
+* **Resampling Logic:** Convert all incoming files to **16kHz Mono** (Whisper's "Gold Standard").
+* **PCM Encoder:** Custom helper to convert processed buffers into 16-bit WAV Blobs.
+
+
+
+---
+
+### 2. Media Player & Timeline UI
+
+* **"Studio" Playback Architecture:**
+* **Master/Slave Sync:** Muted HTML5 `<video>` follows the Wavesurfer (Audio) play-head.
+* **Wavesurfer Integration:** Display normalized waveforms using the processed `cleanBlob`.
+* **Transport Controls:** Unified Play/Pause and 5s skip buttons.
+
+
+* **Waveform Visualization:**
+* **Scrubbing Logic:** Bidirectional sync between timeline clicking and video frames.
+* **Speaker Regions:** Visual color-coding on the timeline to show who is speaking and when (Multi-track visualization).
+
+
+
+---
+
+### 3. Transcription & Analysis Engine
+
+* **Local AI Integration:**
+* Integration of **local Whisper** models (aiming for 'Small' or 'Distil' versions for accuracy).
+* **Traceability View:** Side-by-side layout showing the transcript next to the media player.
+
+
+* **Evidence Curation:**
+* "Highlight-to-Card" workflow for extracting specific quotes from the transcript.
+* **Contextual Linking:** Clicking an insight card jumps the media player to that exact timestamp.
+
+
+
+---
+
+### 4. Strategy & Data Management
+
+* **JTBD/ODI Frameworks:**
+* **Priority Index:** Calculation of "Opportunity" using renamed formulas to respect IP (Importance + Gap logic).
+* **Outcome Mapping:** Categorizing segments into Desired Outcomes or Pain Points.
+
+
+* **Local-First Architecture:**
+* No cloud uploads; all media stays on the user's local machine.
+* Export functionality for "Codebooks" or research summaries.
+
+
+
+---
+
+### 5. Technical Maintenance & Sync Fixes
+
+* **Circular Loop Prevention:** Implementation of the `isInternalChange` guard in Vue composables.
+* **Buffer Management:** Ensuring video and audio are both "Ready" before allowing playback to start.
+* **Error Handling:** Fallback logic to original files if the pre-processor fails.
+
+---
+
+**Is there a specific section here you’d like to prioritize next, or should we refine the "Speaker Regions" logic for that multi-track look?**
