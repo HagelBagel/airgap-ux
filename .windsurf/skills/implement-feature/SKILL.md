@@ -68,7 +68,7 @@ These are hard constraints from the system prompt and ADR. If a proposed impleme
 | State | Pinia only for shared state. No Vuex, no global reactive objects outside stores. |
 | Privacy | No external API calls. No analytics. No cloud. Must work fully air-gapped. |
 | File access | Use File System Access API. Never copy raw media into IndexedDB or browser storage. |
-| Testing | Vitest Browser Mode only. No JSDOM. |
+| Testing | Vitest with jsdom (current config). Browser Mode is the future target but is not yet active — do not switch environments mid-task without explicit discussion. |
 | Opportunity score | `Importance + max(Importance − Satisfaction, 0)`. Never deviate from this formula. |
 | Model loading | `dtype: 'fp16'` or `quantized: true`. Always show a progress-bar state during loading. |
 
@@ -168,4 +168,17 @@ After implementing the feature, append a dated entry to `notes/progress.md`:
 
 ## Step 8 — Mark Task Complete
 
-Update the `todo_list` task status to `completed` and set the next task to `in_progress`.
+1. Update the `todo_list` task status to `completed` and set the next task to `in_progress`.
+2. Mark the corresponding checkbox in `notes/task-list.md` as `[x]`.
+
+Both must be updated — `todo_list` is session-scoped; `notes/task-list.md` is the durable record.
+
+## Step 9 — Handle Discovered Follow-on Tasks
+
+If implementation reveals adjacent work not covered by the original issue (e.g. routing changes, missing store slices, new UI states), do not implement them silently on the same branch.
+
+Instead:
+1. Note the discovered task in the conversation.
+2. Add it to `notes/task-list.md` as a new unchecked item.
+3. Add it to `todo_list` as `pending`.
+4. Discuss with the user whether to open a new GitHub issue and branch before proceeding.
