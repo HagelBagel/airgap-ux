@@ -1,19 +1,26 @@
 <script setup lang="ts">
+import { watch } from 'vue'
+import { useRouter } from 'vue-router'
 import VaultSelector from '../components/VaultSelector.vue'
 import { useVaultStore } from '../stores/vault'
 
 const vault = useVaultStore()
+const router = useRouter()
+
+watch(
+  () => vault.activeVault,
+  (val) => {
+    if (val) router.push('/dashboard')
+  }
+)
 </script>
 
 <template>
   <main class="home-view">
-    <section v-if="!vault.activeVault" class="home-view__setup">
+    <section class="home-view__setup">
       <h1 class="home-view__heading">Welcome to AirGap UX</h1>
       <p class="home-view__description">Select a local folder to use as your research vault.</p>
       <VaultSelector />
-    </section>
-    <section v-else class="home-view__vault-active">
-      <p class="home-view__vault-name">Vault: <strong>{{ vault.activeVault.name }}</strong></p>
     </section>
   </main>
 </template>
