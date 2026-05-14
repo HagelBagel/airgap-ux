@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 test_media
-notes
+
 
 # Editor directories and files
 .vscode/*
