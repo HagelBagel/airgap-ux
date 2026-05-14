@@ -1,5 +1,5 @@
 ---
-description: Create a new feature branch from a GitHub issue and planning ID
+description: Create a new feature branch from a GitHub issue and planning ID, then push and open a PR when done
 ---
 
 # New Branch Workflow
@@ -24,12 +24,14 @@ Types:
 
 ## Steps
 
-1. Confirm you are on `main` and it is up to date:
+1. Confirm you are on `main`, it is clean, and it is up to date:
 
 ```powershell
 git status --short
 git pull origin main
 ```
+
+**Important:** If `git status` shows any uncommitted changes, commit or stash them on `main` before creating the branch. Starting a branch with uncommitted main-level changes will mix concerns across commits.
 
 2. Identify the planning ID and short slug from the issue title. For example, issue `LPM-001: Add "Select Vault" UI action` becomes:
 
@@ -51,11 +53,23 @@ git branch --show-current
 
 5. Update the task status in the todo list — set the corresponding task to `in_progress`.
 
-6. When the work is complete, push and open a PR referencing the issue:
+6. After implementation, commit the work on the feature branch:
+
+```powershell
+git add <files>
+git commit -m "feat(lpm-001-a): description of what was done"
+```
+
+7. Push the branch to GitHub — the branch does not exist on GitHub until this step:
 
 ```powershell
 git push -u origin feat/lpm-001-select-vault-action
-gh pr create --title "feat: LPM-001 Add Select Vault UI action" --body "Closes #4"
 ```
 
-Reference both the planning ID and the GitHub issue number in the PR body.
+8. Open a PR targeting `main`. Always reference both the planning ID and the closing issue number:
+
+```powershell
+gh pr create --title "feat(lpm-001-a): Add Select Vault UI action" --body "Closes #4"
+```
+
+The PR will not appear on GitHub until steps 7 and 8 are complete.
