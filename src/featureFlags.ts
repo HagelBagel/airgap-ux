@@ -6,7 +6,7 @@
  * Fast UI Mode (pre-canned data) for local UI-only development.
  *
  *   true  → Fast UI Mode: worker returns mock data instantly, no GPU needed.
- *   false → Real AI Mode: full Whisper transcription + JTBD extraction.
+ *   false → Real AI Mode: in-browser JTBD extraction with the local LLM.
  */
 const mockModeFromEnv = import.meta.env.VITE_MOCK_MODE;
 

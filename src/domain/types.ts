@@ -60,9 +60,7 @@ export interface ResearchProject {
 /** Lifecycle stages of the AI processing pipeline. */
 export type ProcessingStage =
   | 'idle'
-  | 'audio-preprocessing'
   | 'loading-models'
-  | 'transcribing'
   | 'extracting'
   | 'scoring'
   | 'done'

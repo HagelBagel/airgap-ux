@@ -1,14 +1,21 @@
 ## Hosted-first pivot (ADRs 0001-0003)
 
 - [x] Record decisions as ADRs 0001-0003 and update CLAUDE.md
-- [ ] Remove audio/video transcription code and deps (ADR 0002)
+- [x] Remove audio/video transcription code and deps (ADR 0002)
 - [ ] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser
+- [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
 - [ ] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence)
 - [ ] Scaffold own API with SQL migrations
 - [ ] Replace vault flow (HomeView, VaultSelector, requiresVault) with sign-in + project list
 - [ ] Update notes/project-brief.md to the new scope
+
+## Pre-existing breakages (found 2026-10-26)
+
+- [ ] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (file lives in `job-cards/`); breaks `ResearchWorkbench.spec.ts` and `npm run build`
+- [ ] Fix `vue-tsc -b` errors: `window.showDirectoryPicker` untyped in `src/stores/vault.ts`; `test` key rejected in `vite.config.ts`
+- [ ] Resolve `vite-plugin-pwa` peer conflict with Vite 8 (npm needs `--legacy-peer-deps`)
 
 ## LPM-001: Select a Vault Folder
 

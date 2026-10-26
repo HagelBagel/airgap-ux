@@ -1,30 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useResearchStore, MOCK_MODE } from '../stores/useResearchStore'
-import { processAudio } from '../services/audio/audioPreprocessor'
-import { useWavesurferSync } from '../composables/useWavesurferSync'
-import FileDropzone from '../components/upload/FileDropzone.vue'
+import { MOCK_SEGMENTS } from '../services/ai/mockData'
 import ResearchWorkbench from '../components/ResearchWorkbench.vue'
 import ProcessingStatus from '../components/ProcessingStatus.vue'
 import AppSettings from '../components/AppSettings.vue'
-import VideoPlayer from '../components/VideoPlayer.vue'
-import WaveformTimeline from '../components/WaveformTimeline.vue'
 
 const store = useResearchStore()
 
 // ── Settings dialog state ────────────────────────────────────────────────────
 const isSettingsOpen = ref(false)
-
-// ── Video player state ───────────────────────────────────────────────────────
-const videoUrl = ref<string | null>(null)
-const videoPlayerRef = ref<InstanceType<typeof VideoPlayer> | null>(null)
-const waveformRef = ref<InstanceType<typeof WaveformTimeline> | null>(null)
-
-// ── Audio state for wavesurfer and transcription ─────────────────────────────
-const audioUrl = ref<string | null>(null)
-
-// ── Audio processing controls ───────────────────────────────────────────────────
-// const audioGain = ref(1.5) // Default 50% boost
 
 // ── Derived UI state ──────────────────────────────────────────────────────────
 
@@ -33,124 +18,16 @@ const hasResults = computed(() =>
   (store.currentProject?.jobCards?.length ?? 0) > 0,
 )
 
-
-
-// ── Media Sync state ───────────────────────────────────────────────────────
-const wavesurferSync = ref<ReturnType<typeof useWavesurferSync> | null>(null)
-
-// Safe computed properties for template access
-const isWavesurferSyncReady = computed(() => wavesurferSync.value !== null)
-const isPlaying = computed(() => wavesurferSync.value?.isPlaying ?? false)
-const currentTime = computed(() => wavesurferSync.value?.currentTime ?? 0)
-const duration = computed(() => wavesurferSync.value?.duration ?? 0)
-
-// Watch for both components to be ready, then initialize sync
-watch([videoPlayerRef, waveformRef], ([videoPlayer, waveform]) => {
-  if (videoPlayer && waveform && waveform.wavesurfer && videoPlayer.videoElement) {
-    console.log('Initializing Wavesurfer-as-master sync')
-    wavesurferSync.value = useWavesurferSync(waveform.wavesurfer, videoPlayer.videoElement)
-  }
-})
-
 // ── Actions ───────────────────────────────────────────────────────────────────
 
-async function onFilesSelected(files: File[]): Promise<void> {
-  // V1: single-file pipeline. Multiple-file averaging is a future milestone.
-  const file = files[0]
-  console.log('📁 File selected:', file.name, file.type, file.size);
-  
-  try {
-    // Process audio for transcription and wavesurfer (works for both audio and video files)
-    console.log('🔄 Starting audio processing for transcription');
-    const cleanBlob = await processAudio(file)
-    console.log('✅ Clean blob received, size:', cleanBlob.size, 'type:', cleanBlob.type);
-    
-    // Set audio URL for wavesurfer (always use processed audio)
-    const cleanAudioUrl = URL.createObjectURL(cleanBlob)
-    audioUrl.value = cleanAudioUrl
-    console.log('🎵 Audio URL set to processed blob for wavesurfer');
-    
-    // Send the cleanBlob to the store for transcription (accuracy will improve)
-    console.log('📤 Sending clean blob to store...');
-    await store.processMedia(cleanBlob, file.name)
-    console.log('✅ Store processing complete');
-    
-    // Set video URL based on file type
-    if (file.type.startsWith('video/')) {
-      console.log('🎬 Video file detected - using original for player');
-      videoUrl.value = URL.createObjectURL(file)
-      console.log('🎬 Video URL set to original file');
-    } else if (file.type.startsWith('audio/')) {
-      console.log('🎵 Audio file detected - using processed for player');
-      videoUrl.value = cleanAudioUrl
-      console.log('🎵 Video URL set to processed blob (audio file)');
-    } else {
-      // Default fallback for unknown file types
-      console.log('📄 Unknown file type - using processed for player');
-      videoUrl.value = cleanAudioUrl
-      console.log('📄 Video URL set to processed blob (fallback)');
-    }
-  } catch (error) {
-    console.error('❌ Failed to process audio:', error)
-    // Fallback to original file if processing fails
-    console.log('🔄 Falling back to original file');
-    const fallbackUrl = URL.createObjectURL(file)
-    videoUrl.value = fallbackUrl
-    audioUrl.value = fallbackUrl
-    await store.processMedia(file)
-  }
+// Transcript import is not built yet (see ADR 0002); in Mock Mode the sample
+// transcript keeps the analysis UI usable in the meantime.
+function analyzeSampleTranscript(): void {
+  store.analyzeSegments(MOCK_SEGMENTS, 'Sample interview')
 }
 
 function reset(): void {
-  // Clean up URLs if they exist
-  if (videoUrl.value) {
-    URL.revokeObjectURL(videoUrl.value)
-    videoUrl.value = null
-  }
-  if (audioUrl.value) {
-    URL.revokeObjectURL(audioUrl.value)
-    audioUrl.value = null
-  }
-  
   store.resetProject()
-}
-
-function handleVideoTimeUpdate(): void {
-  // Time updates are now handled by useWavesurferSync composable
-}
-
-function handleWaveformTimeUpdate(): void {
-  // Time updates are now handled by useWavesurferSync composable
-}
-
-function handleWaveformReady(duration: number): void {
-  // Handle waveform ready event - sync will be initialized by watcher
-  console.log('Waveform ready, duration:', duration)
-}
-
-// Master Play/Pause control using wavesurferSync composable
-async function toggleMasterPlay(): Promise<void> {
-  if (!wavesurferSync.value) {
-    console.error('Wavesurfer sync not ready')
-    return
-  }
-
-  try {
-    if (wavesurferSync.value.isPlaying) {
-      wavesurferSync.value.pause()
-    } else {
-      await wavesurferSync.value.play()
-    }
-  } catch (error) {
-    console.error('Master playback error:', error)
-  }
-}
-
-// Format time helper
-function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = Math.floor(seconds % 60)
-  return `${mins}:${secs.toString().padStart(2, '0')}`
 }
 
 </script>
@@ -205,42 +82,19 @@ function formatTime(seconds: number): string {
         :allow-calibration-learning="!MOCK_MODE"
       />
 
-      <!-- Video Player: shown when video is uploaded -->
-      <section v-if="videoUrl" class="dashboard__section">
-        <VideoPlayer 
-          ref="videoPlayerRef"
-          :src="videoUrl" 
-          :waveform="audioUrl ? waveformRef : null"
-          @timeupdate="handleVideoTimeUpdate" 
-        />
-      </section>
-
-      <!-- Master Media Controls: shown when both video and audio are ready -->
-      <section v-if="videoUrl && audioUrl && isWavesurferSyncReady" class="dashboard__section">
-        <div class="media-controls">
-          <button class="master-play-btn" @click="toggleMasterPlay">
-            {{ isPlaying ? '⏸ Pause' : '▶ Play' }}
-          </button>
-          <div class="time-display">
-            {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
-          </div>
-        </div>
-      </section>
-
-      <!-- Waveform Timeline: shown when audio is processed -->
-      <section v-if="audioUrl && !isIdle" class="dashboard__section">
-        <WaveformTimeline 
-          ref="waveformRef"
-          :url="audioUrl" 
-          :media-element="videoPlayerRef?.videoElement ?? null"
-          @timeupdate="handleWaveformTimeUpdate"
-          @ready="handleWaveformReady"
-        />
-      </section>
-
-      <!-- Drop zone: only shown when idle -->
+      <!-- Transcript import placeholder: only shown when idle -->
       <section v-if="isIdle" class="dashboard__section">
-        <FileDropzone @files-selected="onFilesSelected" />
+        <div class="dashboard__import">
+          <p class="dashboard__import-text">Transcript import is coming soon.</p>
+          <button
+            v-if="MOCK_MODE"
+            class="dashboard__import-btn"
+            type="button"
+            @click="analyzeSampleTranscript"
+          >
+            Analyse sample transcript
+          </button>
+        </div>
       </section>
 
       <!-- Error state -->
@@ -268,10 +122,10 @@ function formatTime(seconds: number): string {
         class="dashboard__section"
       >
         <div class="dashboard__empty">
-          <p>No outcomes could be extracted from this recording.</p>
+          <p>No outcomes could be extracted from this transcript.</p>
           <p class="dashboard__empty-hint">Try a longer interview, or check the transcript in the store.</p>
           <button class="dashboard__reset-btn" type="button" @click="reset">
-            Try another file
+            Start over
           </button>
         </div>
       </section>
@@ -497,48 +351,33 @@ function formatTime(seconds: number): string {
 
 
 
-/* ── Master Media Controls ───────────────────────────────────────────────────── */
-.media-controls {
-  display: flex;
-  align-items: center;
+/* ── Transcript import placeholder ────────────────────────────────────────────── */
+.dashboard__import {
+  display: grid;
+  justify-items: center;
   gap: var(--space-4);
-  padding: var(--space-4);
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
+  padding: var(--space-8);
+  border: 1px dashed var(--color-border);
   border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--color-text-muted);
 }
 
-.master-play-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-6);
+.dashboard__import-btn {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-accent);
+  transition:
+    background var(--duration-fast),
+    color      var(--duration-fast);
+}
+
+.dashboard__import-btn:hover {
   background: var(--color-accent);
   color: var(--c-white);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--text-base);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--duration-fast);
-}
-
-.master-play-btn:hover {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-}
-
-.master-play-btn:active {
-  transform: translateY(0);
-}
-
-.media-controls .time-display {
-  color: var(--color-text-muted);
-  font-family: 'Courier New', monospace;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  min-width: 100px;
-  text-align: center;
 }
 
 /* ── Empty state ─────────────────────────────────────────────────────────────── */

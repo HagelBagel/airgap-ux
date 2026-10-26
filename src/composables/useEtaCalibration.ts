@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import type { ProcessingStage } from '../domain/types'
 
-type CalibratedStage = 'loading-models' | 'transcribing' | 'extracting' | 'scoring'
+type CalibratedStage = 'loading-models' | 'extracting' | 'scoring'
 
 interface StageCalibration {
   samples: number
@@ -18,14 +18,12 @@ const STORAGE_KEY = 'airgapux.eta-calibration.v1'
 
 const STAGE_ORDER: CalibratedStage[] = [
   'loading-models',
-  'transcribing',
   'extracting',
   'scoring',
 ]
 
 const DEFAULT_STAGE_SECONDS: Record<CalibratedStage, number> = {
   'loading-models': 90,
-  transcribing: 120,
   extracting: 25,
   scoring: 12,
 }
@@ -36,7 +34,6 @@ function createDefaultProfile(): EtaCalibrationProfile {
     completedRuns: 0,
     stages: {
       'loading-models': { samples: 0, avgSeconds: DEFAULT_STAGE_SECONDS['loading-models'] },
-      transcribing: { samples: 0, avgSeconds: DEFAULT_STAGE_SECONDS.transcribing },
       extracting: { samples: 0, avgSeconds: DEFAULT_STAGE_SECONDS.extracting },
       scoring: { samples: 0, avgSeconds: DEFAULT_STAGE_SECONDS.scoring },
     },
@@ -57,10 +54,6 @@ function parseProfile(raw: string | null): EtaCalibrationProfile {
         'loading-models': {
           samples: parsed.stages?.['loading-models']?.samples ?? base.stages['loading-models'].samples,
           avgSeconds: parsed.stages?.['loading-models']?.avgSeconds ?? base.stages['loading-models'].avgSeconds,
-        },
-        transcribing: {
-          samples: parsed.stages?.transcribing?.samples ?? base.stages.transcribing.samples,
-          avgSeconds: parsed.stages?.transcribing?.avgSeconds ?? base.stages.transcribing.avgSeconds,
         },
         extracting: {
           samples: parsed.stages?.extracting?.samples ?? base.stages.extracting.samples,
