@@ -17,7 +17,8 @@ The last commit with the working pipeline is tagged **`archive/audio-transcripti
 Code to remove (in a separate change):
 
 - `src/services/audio/audioPreprocessor.ts`
-- `src/composables/useMediaSync.ts`, `useWavesurferSync.ts`, `useEtaCalibration.ts`
+- `src/composables/useMediaSync.ts`, `useWavesurferSync.ts`
+- The `transcribing` stage in `useEtaCalibration.ts` (the composable itself stays: it also times model loading and LLM analysis)
 - `src/components/VideoPlayer.vue`, `WaveformTimeline.vue` and their specs
 - The Whisper half of `src/workers/ai.worker.ts`, the `TRANSCRIBE` / `TRANSCRIPTION_COMPLETE` messages in `messages.ts`, and the audio queueing and decoding in `useResearchStore.ts`
 - The dependencies `wavesurfer.js` and `@xenova/transformers` (unused)

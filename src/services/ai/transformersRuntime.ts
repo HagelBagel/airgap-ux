@@ -28,6 +28,5 @@ export function configureTransformersRuntime(): void {
  * future management UI that shows model metadata.
  */
 export const MODEL_IDS = {
-  whisper: 'onnx-community/whisper-base',
   llm:     'onnx-community/Qwen2.5-0.5B-Instruct',
 } as const;

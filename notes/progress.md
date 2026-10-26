@@ -365,3 +365,26 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 - [ ] LPM-001-d: Register selected folder as active vault
 - [ ] LPM-001-e: Store vault directory handle in IndexedDB
 - [ ] LPM-001-f: Ensure vault contents are never uploaded to server
+
+---
+
+## 2026-10-26 — Remove audio/video transcription (ADR 0002)
+
+### Files changed
+- Deleted: `services/audio/audioPreprocessor.ts`, `composables/useMediaSync.ts`, `composables/useWavesurferSync.ts`, `components/VideoPlayer.vue` + spec, `components/WaveformTimeline.vue` + spec, empty `services/ai/transcriptionPipeline.ts`.
+- `workers/ai.worker.ts`: removed Whisper loading, `TRANSCRIBE` handler, resampling and ASR types. Model loading now reports progress for the LLM only.
+- `workers/messages.ts`: removed `TRANSCRIBE` and `TRANSCRIPTION_COMPLETE`.
+- New `services/ai/mockData.ts`: mock transcript and job cards moved out of the worker so the store can use the transcript too.
+- `stores/useResearchStore.ts`: `processMedia(blob)` replaced by `analyzeSegments(segments, projectName)`, which queues segments until `MODELS_READY`. New `useResearchStore.spec.ts` covers queueing, the warm path, applying results, and reset.
+- `views/ResearchDashboard.vue`: removed video, waveform and playback controls. When idle, it shows a "transcript import is coming" notice, plus an "Analyse sample transcript" button in Mock Mode.
+- `ProcessingStage` lost `audio-preprocessing` and `transcribing`; status label, task list, ETA calibration and their specs updated.
+- Removed `wavesurfer.js` and `@xenova/transformers`; removed the `OfflineAudioContext`/`AudioBuffer` ESLint globals; removed `whisper` from `MODEL_IDS`.
+
+### Key decisions
+- Pure removal: real-mode analysis has no entry point until the text import lands. Mock Mode keeps the analysis UI demoable.
+- `useEtaCalibration` kept (it also times model loading and LLM stages); only its `transcribing` stage was removed. ADR 0002 corrected.
+- `FileDropzone.vue` kept but unused; it will be reworked for transcript upload.
+
+### Next steps
+- Plain-text transcript parser + optional timestamps; reuse the drop zone for upload.
+- Pre-existing breakages logged in `notes/task-list.md` (`ResearchWorkbench` import, `vue-tsc -b` errors).

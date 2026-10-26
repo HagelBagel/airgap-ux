@@ -16,21 +16,10 @@ export interface LoadModelsMsg {
   };
 }
 
-export interface TranscribeMsg {
-  type: 'TRANSCRIBE';
-  payload: {
-    /** Raw PCM audio samples (mono). */
-    audioData: Float32Array;
-    /** Original sample rate of audioData (worker resamples to 16 kHz as needed). */
-    sampleRate: number;
-    mockMode: boolean;
-  };
-}
-
 export interface RunStrategynAnalysisMsg {
   type: 'RUN_STRATEGYN_ANALYSIS';
   payload: {
-    /** Transcript segments produced by TRANSCRIBE (or loaded from storage). */
+    /** Transcript segments to analyse. */
     segments: SpeakerSegment[];
     mockMode: boolean;
   };
@@ -38,7 +27,6 @@ export interface RunStrategynAnalysisMsg {
 
 export type WorkerInMessage =
   | LoadModelsMsg
-  | TranscribeMsg
   | RunStrategynAnalysisMsg;
 
 // ─── Outbound: worker → main thread ───────────────────────────────────────────
@@ -58,13 +46,6 @@ export interface ModelsReadyMsg {
   type: 'MODELS_READY';
   payload: {
     mockMode: boolean;
-  };
-}
-
-export interface TranscriptionCompleteMsg {
-  type: 'TRANSCRIPTION_COMPLETE';
-  payload: {
-    segments: SpeakerSegment[];
   };
 }
 
@@ -89,6 +70,5 @@ export interface WorkerErrorMsg {
 export type WorkerOutMessage =
   | ProgressMsg
   | ModelsReadyMsg
-  | TranscriptionCompleteMsg
   | AnalysisCompleteMsg
   | WorkerErrorMsg;

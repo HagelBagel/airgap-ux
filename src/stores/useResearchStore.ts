@@ -10,7 +10,7 @@
 import { defineStore } from 'pinia';
 import { ref, readonly } from 'vue';
 
-import type { JobCard, ProcessingStage, ResearchProject } from '../domain/types';
+import type { JobCard, ProcessingStage, ResearchProject, SpeakerSegment } from '../domain/types';
 import type { WorkerInMessage, WorkerOutMessage } from '../workers/messages';
 import { computeOpportunityScore } from '../domain/strategyn/opportunityScore';
 import { averageOutcome, hasTension } from '../domain/strategyn/variance';
@@ -52,10 +52,10 @@ export const useResearchStore = defineStore('research', () => {
   let modelsReady = false;
 
   /**
-   * Audio queued while models are still loading.
-   * Sent as a TRANSCRIBE message the moment MODELS_READY arrives.
+   * Segments queued while models are still loading.
+   * Sent as a RUN_STRATEGYN_ANALYSIS message the moment MODELS_READY arrives.
    */
-  let pendingAudio: { audioData: Float32Array; sampleRate: number } | null = null;
+  let pendingSegments: SpeakerSegment[] | null = null;
 
   // ── Worker lifecycle ─────────────────────────────────────────────────────────
 
@@ -94,28 +94,16 @@ export const useResearchStore = defineStore('research', () => {
       // ── Models loaded (or mock-mode fast-path) ─────────────────────────────
       case 'MODELS_READY':
         modelsReady = true;
-        // Flush any audio that was queued before models finished loading.
-        if (pendingAudio) {
-          const { audioData, sampleRate } = pendingAudio;
-          pendingAudio = null;
+        // Flush any segments that were queued before models finished loading.
+        if (pendingSegments) {
+          const segments = pendingSegments;
+          pendingSegments = null;
           postToWorker({
-            type:    'TRANSCRIBE',
-            payload: { audioData, sampleRate, mockMode: MOCK_MODE },
+            type:    'RUN_STRATEGYN_ANALYSIS',
+            payload: { segments, mockMode: MOCK_MODE },
           });
         }
         break;
-
-      // ── Transcript ready → kick off JTBD extraction ───────────────────────
-      case 'TRANSCRIPTION_COMPLETE': {
-        const segments = msg.payload.segments;
-        ensureProject();
-        currentProject.value!.segments = segments;
-        postToWorker({
-          type:    'RUN_STRATEGYN_ANALYSIS',
-          payload: { segments, mockMode: MOCK_MODE },
-        });
-        break;
-      }
 
       // ── JTBD extraction complete → apply variance, persist to store ────────
       case 'ANALYSIS_COMPLETE': {
@@ -141,47 +129,29 @@ export const useResearchStore = defineStore('research', () => {
   // ── Actions ──────────────────────────────────────────────────────────────────
 
   /**
-   * Primary entry point: drop a media file and start the full pipeline.
+   * Primary entry point: run JTBD analysis on transcript segments.
    *
-   * In Mock Mode the audio decoding step is skipped entirely — the file is
-   * only used to name the project. The worker returns pre-canned data
-   * regardless of what audio is sent.
-   *
-   * In real mode, pre-processed audio (Blob) is decoded to mono PCM on the 
-   * main thread and sent to the worker as a Float32Array (already 16 kHz).
+   * Models are loaded on first use; segments that arrive before MODELS_READY
+   * are queued and sent as soon as the worker reports ready.
    */
-  async function processMedia(audioBlob: Blob | File, fileName?: string): Promise<void> {
+  function analyzeSegments(segments: SpeakerSegment[], projectName: string): void {
     error.value           = null;
     usedFallback.value    = false;
     processingStartedAt.value = Date.now();
     processingStage.value = 'loading-models';
     loadProgress.value    = 0;
     processingDetail.value = '';
-    // Use fileName if provided, otherwise extract from blob
-    const projectName = fileName || (audioBlob instanceof File ? audioBlob.name : 'processed-audio');
-    ensureProject(projectName.replace(/\.[^.]+$/, '')); // strip extension for name
-
-    let audioData: Float32Array;
-    let sampleRate: number;
-
-    if (MOCK_MODE) {
-      // Skip audio decoding — worker ignores these values in mock mode.
-      audioData  = new Float32Array(0);
-      sampleRate = 16_000;
-    } else {
-      const extracted = await decodeAudioFile(audioBlob);
-      audioData  = extracted.audioData;
-      sampleRate = extracted.sampleRate;
-    }
+    ensureProject(projectName);
+    currentProject.value!.segments = segments;
 
     initWorker();
 
     if (modelsReady) {
-      // Models already warmed up (e.g. second file in a session).
-      postToWorker({ type: 'TRANSCRIBE', payload: { audioData, sampleRate, mockMode: MOCK_MODE } });
+      // Models already warmed up (e.g. second transcript in a session).
+      postToWorker({ type: 'RUN_STRATEGYN_ANALYSIS', payload: { segments, mockMode: MOCK_MODE } });
     } else {
-      // Queue the audio; worker will flush it when MODELS_READY fires.
-      pendingAudio = { audioData, sampleRate };
+      // Queue the segments; they are flushed when MODELS_READY fires.
+      pendingSegments = segments;
       postToWorker({ type: 'LOAD_MODELS', payload: { mockMode: MOCK_MODE } });
     }
   }
@@ -194,7 +164,7 @@ export const useResearchStore = defineStore('research', () => {
     worker?.terminate();
     worker              = null;
     modelsReady         = false;
-    pendingAudio        = null;
+    pendingSegments     = null;
     currentProject.value  = null;
     processingStage.value = 'idle';
     loadProgress.value    = 0;
@@ -408,36 +378,6 @@ export const useResearchStore = defineStore('research', () => {
     });
   }
 
-  /**
-   * Decode pre-processed audio blob to mono 32-bit float PCM.
-   * The audio is already processed (filtered, compressed, resampled) by the audio preprocessor.
-   * Just needs to be decoded to Float32Array for the worker.
-   */
-  async function decodeAudioFile(
-    audioBlob: Blob | File,
-  ): Promise<{ audioData: Float32Array; sampleRate: number }> {
-    // Convert the blob to array buffer for decoding
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    
-    // Use OfflineAudioContext for decoding
-    const decoderContext = new OfflineAudioContext(1, 1, 16_000);
-    
-    let audioBuffer: AudioBuffer;
-    try {
-      audioBuffer = await decoderContext.decodeAudioData(arrayBuffer);
-    } finally {
-      // No close() API on OfflineAudioContext.
-    }
-
-    // Extract the mono audio data (should already be mono from preprocessor)
-    const monoData = audioBuffer.getChannelData(0);
-    
-    return { 
-      audioData: monoData, 
-      sampleRate: audioBuffer.sampleRate 
-    };
-  }
-
   // ── Public API ───────────────────────────────────────────────────────────────
 
   return {
@@ -451,7 +391,7 @@ export const useResearchStore = defineStore('research', () => {
     processingStartedAt: readonly(processingStartedAt),
 
     // Actions
-    processMedia,
+    analyzeSegments,
     resetProject,
     updateCardScore,
     mergeCards,

@@ -144,27 +144,27 @@ describe('ProcessingStatus - Critical Logic', () => {
     expect((wrapper.vm as any).canExport).toBe(false)
   })
 
-  it('displays correct status label for audio-preprocessing stage', () => {
+  it('displays correct status label for extracting stage', () => {
     const wrapper = mount(ProcessingStatus, {
       props: { 
-        stage: 'audio-preprocessing',
+        stage: 'extracting',
         loadProgress: 0.3,
-        progressDetail: 'Processing audio file...',
+        progressDetail: 'Extracting outcomes...',
         usedFallback: false,
         startedAt: 1234567890,
         allowCalibrationLearning: true
       }
     })
 
-    expect((wrapper.vm as any).statusLabel).toBe('Processing audio…')
+    expect((wrapper.vm as any).statusLabel).toBe('Analyzing Outcomes…')
   })
 
-  it('calculates isWorking correctly for audio-preprocessing stage', () => {
+  it('calculates isWorking correctly for extracting stage', () => {
     const wrapper = mount(ProcessingStatus, {
       props: { 
-        stage: 'audio-preprocessing',
+        stage: 'extracting',
         loadProgress: 0.3,
-        progressDetail: 'Processing audio file...',
+        progressDetail: 'Extracting outcomes...',
         usedFallback: false,
         startedAt: 1234567890,
         allowCalibrationLearning: true

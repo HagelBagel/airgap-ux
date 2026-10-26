@@ -8,10 +8,10 @@ Sovereign JTBD (package name `sovereign-jtbd`): a Vue 3 app for UX researchers. 
 
 **Direction (2026-10-26):** the app is moving from local-first and air-gapped to **hosted first with our own API and Postgres in the EU**. Read `docs/adr/` before designing anything:
 - `0001`: hosted first, own API + EU Postgres (supersedes the vault ADR `notes/epics/adr.md`)
-- `0002`: audio/video transcription deferred; the code is archived at tag `archive/audio-transcription` and will be removed from `main`
+- `0002`: audio/video transcription deferred; the code is archived at tag `archive/audio-transcription` and removed from `main`
 - `0003`: AI analysis runs in the browser behind an `AnalysisProvider` interface; a server-side provider may come later
 
-The Architecture section below describes the code **as it is today**, including the audio and vault parts that are on their way out. Don't build new features on them.
+The Architecture section below describes the code **as it is today**, including the vault parts that are on their way out. Don't build new features on them.
 
 ## Commands
 
@@ -32,17 +32,15 @@ npm run code-quality   # type-check + lint + test (run before committing)
 
 ## Architecture
 
-**Main thread ↔ worker bridge.** All transformers.js inference runs in `src/workers/ai.worker.ts`. `src/stores/useResearchStore.ts` (the main Pinia store) creates the worker once (`initWorker`), posts typed messages, and applies results to state. The message contract lives in `src/workers/messages.ts`: inbound `LOAD_MODELS` / `TRANSCRIBE` / `RUN_STRATEGYN_ANALYSIS`, outbound `PROGRESS` / `MODELS_READY` / `TRANSCRIPTION_COMPLETE` / `ANALYSIS_COMPLETE` / `ERROR`. Every message carries `mockMode`. The worker must never import Vue or Pinia; when you add a message, update `messages.ts` and handle it on both sides. The store queues audio that arrives before `MODELS_READY`.
+**Main thread ↔ worker bridge.** All transformers.js inference runs in `src/workers/ai.worker.ts`. `src/stores/useResearchStore.ts` (the main Pinia store) creates the worker once (`initWorker`), posts typed messages, and applies results to state. The message contract lives in `src/workers/messages.ts`: inbound `LOAD_MODELS` / `RUN_STRATEGYN_ANALYSIS`, outbound `PROGRESS` / `MODELS_READY` / `ANALYSIS_COMPLETE` / `ERROR`. Every message carries `mockMode`. The worker must never import Vue or Pinia; when you add a message, update `messages.ts` and handle it on both sides. The entry point is `analyzeSegments(segments, projectName)`; the store queues segments that arrive before `MODELS_READY`. Mock transcript and job cards live in `src/services/ai/mockData.ts`. There is no transcript import yet: in Mock Mode the dashboard offers "Analyse sample transcript".
 
-**Models.** Whisper `onnx-community/whisper-base` and `onnx-community/Qwen2.5-0.5B-Instruct`, cached in the browser Cache API so the app works offline after the first load. Model IDs are duplicated in the worker and in `src/services/ai/transformersRuntime.ts` (`MODEL_IDS`); keep both in sync. `configureTransformersRuntime()` runs in `main.ts` before anything else. The worker throttles `PROGRESS` posts (3% threshold). Analysis falls back to deterministic extraction when the LLM output isn't valid JSON (`usedFallback`).
+**Models.** `onnx-community/Qwen2.5-0.5B-Instruct`, cached in the browser Cache API after the first load. Model IDs are duplicated in the worker and in `src/services/ai/transformersRuntime.ts` (`MODEL_IDS`); keep both in sync. `configureTransformersRuntime()` runs in `main.ts` before anything else. The worker throttles `PROGRESS` posts (3% threshold). Analysis falls back to deterministic extraction when the LLM output isn't valid JSON (`usedFallback`).
 
 **Domain logic** (`src/domain/strategyn/`) is pure and framework-free: `opportunityScore.ts` implements `Importance + max(Importance − Satisfaction, 0)` (required test cases: I=1,S=10 → 1; I=10,S=1 → 19). `variance.ts` averages multi-speaker outcomes and flags "tension" when Satisfaction differs by more than 3 between speakers. Shared types are in `src/domain/types.ts`.
 
-**Audio.** `src/services/audio/audioPreprocessor.ts` uses `OfflineAudioContext` (80 Hz high-pass, compressor, resample to 16 kHz mono). Playback keeps a muted `<video>` in sync with the Wavesurfer playhead (`src/composables/useMediaSync.ts`, `useWavesurferSync.ts`), using an `isInternalChange` guard to stop the two from re-triggering each other.
-
 **Routing / vault.** Hash-history router (`src/router/index.ts`). `/` is `HomeView` (vault selection); `/dashboard` has `meta.requiresVault` and redirects to `/` unless `useVaultStore().activeVault` is set. The vault uses the File System Access API (`showDirectoryPicker({ mode: 'readwrite' })`).
 
-**Placeholders.** `src/stores/processing.ts`, `src/stores/researchProject.ts`, `src/services/storage/indexedDb.ts`, `src/services/storage/repositories.ts`, and `src/services/ai/transcriptionPipeline.ts` are empty scaffold files. IndexedDB persistence (`idb`) is not wired up yet. `vite-plugin-pwa` is installed but not configured in `vite.config.ts`.
+**Placeholders.** `src/stores/processing.ts`, `src/stores/researchProject.ts`, `src/services/storage/indexedDb.ts`, and `src/services/storage/repositories.ts` are empty scaffold files. IndexedDB persistence (`idb`) is not wired up yet. `vite-plugin-pwa` is installed but not configured in `vite.config.ts`.
 
 ## Hard constraints
 

@@ -23,8 +23,6 @@ export default [
         Worker: 'readonly',
         MessageEvent: 'readonly',
         File: 'readonly',
-        OfflineAudioContext: 'readonly',
-        AudioBuffer: 'readonly',
         ErrorEvent: 'readonly',
         self: 'readonly',
         setTimeout: 'readonly',
