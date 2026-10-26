@@ -4,7 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Sovereign JTBD (package name `sovereign-jtbd`): a local-first Vue 3 PWA for UX researchers. It transcribes interview audio/video in the browser (Whisper via transformers.js + WebGPU), extracts Jobs-to-be-Done outcomes with a small local LLM, and scores them with the Strategyn/ODI Opportunity formula. Product context: `notes/project-brief.md`; story backlog: `notes/epics/user-stories.md`; architecture decision for vault/file storage: `notes/epics/adr.md`.
+Sovereign JTBD (package name `sovereign-jtbd`): a Vue 3 app for UX researchers. Researchers sign in, upload interview transcripts (text), tag them, link insights to quotes, and run Jobs-to-be-Done analysis with a small LLM in the browser. Outcomes are scored with the Strategyn/ODI Opportunity formula. Product context: `notes/project-brief.md`; story backlog: `notes/epics/user-stories.md`.
+
+**Direction (2026-10-26):** the app is moving from local-first and air-gapped to **hosted first with our own API and Postgres in the EU**. Read `docs/adr/` before designing anything:
+- `0001`: hosted first, own API + EU Postgres (supersedes the vault ADR `notes/epics/adr.md`)
+- `0002`: audio/video transcription deferred; the code is archived at tag `archive/audio-transcription` and will be removed from `main`
+- `0003`: AI analysis runs in the browser behind an `AnalysisProvider` interface; a server-side provider may come later
+
+The Architecture section below describes the code **as it is today**, including the audio and vault parts that are on their way out. Don't build new features on them.
 
 ## Commands
 
@@ -39,21 +46,20 @@ npm run code-quality   # type-check + lint + test (run before committing)
 
 ## Hard constraints
 
-From `.github/prompts/system.prompt.md` and `.windsurf/skills/implement-feature/SKILL.md`:
+From `.github/prompts/system.prompt.md`, `.windsurf/skills/implement-feature/SKILL.md` and `docs/adr/`. Where those older prompt files still say "air-gapped" or "no cloud", the ADRs win.
 
-- **Privacy:** no external API calls, analytics, or cloud services. The app must work fully air-gapped once models are cached.
-- **AI work** only in Web Workers; load models with `dtype: 'fp16'` or quantized, and show progress state during download/warm-up.
+- **Privacy / personal data:** data is stored only in our own API and Postgres, hosted in the EU. No third-party analytics, trackers or cloud AI APIs. Collect only what a feature needs, document new personal data before shipping it, and make sure a user's or project's data can actually be deleted.
+- **AI work** runs in the browser in Web Workers, behind the `AnalysisProvider` interface (ADR 0003). Transcript text is never sent to a model provider. Load models with `dtype: 'fp16'` or quantized, and show progress state during download/warm-up.
 - **Vue:** Composition API with `<script setup lang="ts">` only. **Pinia** setup-style stores (`defineStore('id', () => {...})`) for shared state.
 - **Styling:** scoped CSS only, using native CSS nesting and custom properties (tokens in `src/styles/tokens.css`), with BEM / component-first class names. **No Tailwind** or other utility frameworks.
-- **Job-card scores** must always carry Evidence (time-stamped quotes) so a human can verify them.
-- **Vault folder model (ADR):** `Vault/Project/{input/, output/, .jtbd_workspace/}`. App internals go only in `.jtbd_workspace/`. Never copy raw media into IndexedDB; store handles and metadata only. If vault access is lost, degrade to read-only mode rather than blocking the UI.
+- **Job-card scores** must always carry Evidence (quotes linked to transcript segments) so a human can verify them.
 - **Tests:** co-locate them as `*.spec.ts`. Mock transformers pipelines; never download real models in tests. Test worker communication with `postMessage` mocks. Test style guidance: `.windsurf/skills/write-unit-test/SKILL.md` (Vitest 4 notes in `.windsurf/skills/vitest-4-reference.md`).
 
 ## Workflow conventions
 
 - Branches: `<type>/<planning-id>-<short-slug>` (e.g. `feat/lpm-001-select-vault-action`; types `feat` / `fix` / `chore`). Branch from a clean, up-to-date `main`. Propose the `git checkout -b` command for approval before running it.
 - Commits: `feat(lpm-001-a): ...`. PRs target `main`, and the body references the issue (`Closes #N`). Issue drafts live in `.github/generated-issues/`.
-- Before implementing, read the issue's acceptance criteria and the ADR (when touching vault, files, or IndexedDB). Outline tests before writing code.
+- Before implementing, read the issue's acceptance criteria and the relevant ADRs in `docs/adr/`. Outline tests before writing code.
 - After implementing a feature, append a dated entry to `notes/progress.md` (files changed, key decisions, next steps) and tick the matching item in `notes/task-list.md`.
 - Don't implement follow-on work you discover along the way on the same branch. Add it to `notes/task-list.md` and raise it with the user.
 
@@ -69,4 +75,4 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 ### Domain docs
 
-Single-context: root `GLOSSARY.md` + `docs/adr/` (legacy ADR at `notes/epics/adr.md`). See `docs/agents/domain.md`.
+Single-context: root `GLOSSARY.md` + `docs/adr/` (the legacy vault ADR at `notes/epics/adr.md` is superseded by ADR 0001). See `docs/agents/domain.md`.
