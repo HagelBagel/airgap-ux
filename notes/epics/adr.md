@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted for the first file/project management epic.
+Superseded (2026-10-26) by [docs/adr/0001](../../docs/adr/0001-hosted-first-own-api-and-eu-postgres.md): the app is now hosted first with its own API and Postgres in the EU. A local vault may come back later as an optional mode. Kept for history.
+
+Originally accepted for the first file/project management epic.
 
 ## Context
 
