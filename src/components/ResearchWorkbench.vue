@@ -1,138 +1,248 @@
-
 <template>
   <div class="research-workbench">
     <div class="transcript-column">
       <div class="transcript-container">
-        <ul v-for="(block, index) in transcriptBlocks" :key="index" class="transcript-block">
-          <li>
-            <span class="speaker-id">{{ block.speakerId }}</span>
-            <p>{{ block.text }}</p>
-          </li>
-        </ul>
+        <div v-for="(block, index) in transcriptBlocks" :key="index" class="transcript-block">
+          <span class="speaker-id">{{ block.speakerId }}</span>
+          <p @mouseup="handleSelection($event, block.speakerId)" v-html="highlightTranscriptText(block.text)"></p>
+        </div>
       </div>
     </div>
     <div class="job-cards-column">
-      <header class="dashboard__results-header">
-          <div class="dashboard__results-header-left">
-            <h2 class="dashboard__results-title">Desired Outcomes</h2>
-            <span class="dashboard__results-count">
-              {{ sortedCards.length }} outcome{{ sortedCards.length !== 1 ? 's' : '' }}
-            </span>
-          </div>
-          <div class="dashboard__results-actions">
-            <button
-              class="dashboard__export-btn"
-              type="button"
-              @click="handleExportJson"
-              title="Export as JSON"
-            >
-              ↓ JSON
-            </button>
-            <button
-              class="dashboard__export-btn"
-              type="button"
-              @click="handleExportCsv"
-              title="Export as CSV"
-            >
-              ↓ CSV
-            </button>
-          </div>
-        </header>
-        <JobCardsTable :cards="sortedCards" />
+      <JobCardsTable 
+        :cards="jobCards" 
+        :active-card-id="activeCardId" 
+        @card-hover="activeCardId = $event" 
+        @card-click="scrollToEvidence"
+      />
+    </div>
+    
+    <!-- Floating menu for text selection -->
+    <div 
+      v-if="showFloatingMenu" 
+      class="floating-menu"
+      :style="{ 
+        left: floatingMenuPosition.x + 'px', 
+        top: floatingMenuPosition.y + 'px'
+      }"
+    >
+      <button @click="createCard" class="create-card-btn">
+        Create Card
+      </button>
     </div>
   </div>
 </template>
 
-<script>
-import JobCardsTable from './JobCardsTable.vue';
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import JobCardsTable from './job-cards/JobCardsTable.vue'
+import { useResearchStore } from '../stores/useResearchStore'
 
-export default {
-  components: {
-    JobCardsTable
-  },
-  data() {
-    return {
-      transcriptBlocks: [
-        { speakerId: 'S1', text: 'Hello, how are you?' },
-        { speakerId: 'S2', text: 'I am fine. Thank you.' },
-        // Add more blocks as needed
-      ]
-    };
+interface TranscriptBlock {
+  speakerId: string
+  text: string
+}
+
+interface Props {
+  transcriptBlocks: TranscriptBlock[]
+}
+
+defineProps<Props>()
+
+const store = useResearchStore()
+const jobCards = computed(() => store.currentProject?.jobCards ?? [])
+
+// Card hover sync state
+const activeCardId = ref<string | null>(null)
+
+// Text selection state
+const showFloatingMenu = ref(false)
+const floatingMenuPosition = ref({ x: 0, y: 0 })
+const selectedText = ref('')
+const selectedSpeakerId = ref('')
+
+// Transcript highlighting function
+function highlightTranscriptText(text: string): string {
+  if (!activeCardId.value) return text
+  
+  const activeCard = jobCards.value.find(card => card.id === activeCardId.value)
+  if (!activeCard) return text
+  
+  // Get all evidence text from the active card
+  const evidenceTexts = activeCard.evidence.map(e => e.text).filter(Boolean)
+  
+  let highlightedText = text
+  
+  // Highlight each evidence string in the transcript
+  evidenceTexts.forEach(evidenceText => {
+    if (evidenceText && text.includes(evidenceText)) {
+      const regex = new RegExp(`(${evidenceText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+      highlightedText = highlightedText.replace(regex, '<mark class="highlight-active">$1</mark>')
+    }
+  })
+  
+  return highlightedText
+}
+
+// Scroll-to-Source functionality
+function scrollToEvidence(cardId: string): void {
+  const card = jobCards.value.find(c => c.id === cardId)
+  if (!card) return
+  
+  // Get all evidence text from the card
+  const evidenceTexts = card.evidence.map(e => e.text).filter(Boolean)
+  if (evidenceTexts.length === 0) return
+  
+  // Find the first transcript block that contains any evidence text
+  const transcriptBlocks = document.querySelectorAll('.transcript-block')
+  
+  for (let i = 0; i < transcriptBlocks.length; i++) {
+    const block = transcriptBlocks[i] as HTMLElement
+    const blockText = block.textContent || ''
+    
+    // Check if this block contains any of the evidence texts
+    const hasEvidence = evidenceTexts.some(evidenceText => 
+      blockText.includes(evidenceText)
+    )
+    
+    if (hasEvidence) {
+      // Scroll to the transcript block smoothly
+      block.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+      
+      // Briefly highlight the found block
+      block.classList.add('transcript-block--highlighted')
+      setTimeout(() => {
+        block.classList.remove('transcript-block--highlighted')
+      }, 2000)
+      
+      break
+    }
   }
-};
+}
+
+function handleSelection(event: MouseEvent, speakerId: string): void {
+  const selection = window.getSelection()
+  if (!selection || selection.isCollapsed) {
+    showFloatingMenu.value = false
+    return
+  }
+  
+  const text = selection.toString().trim()
+  if (text) {
+    selectedText.value = text
+    selectedSpeakerId.value = speakerId
+    
+    // Position floating menu near mouse
+    floatingMenuPosition.value = {
+      x: event.clientX + 10,
+      y: event.clientY - 40
+    }
+    showFloatingMenu.value = true
+  }
+}
+
+function createCard(): void {
+  store.createManualCard(selectedText.value, selectedSpeakerId.value)
+  
+  // Reset selection
+  showFloatingMenu.value = false
+  selectedText.value = ''
+  selectedSpeakerId.value = ''
+  window.getSelection()?.removeAllRanges()
+}
 </script>
 
 <style scoped>
 .research-workbench {
   display: grid;
   grid-template-columns: 40% 60%;
-  height: 100vh; /* Adjust to your needs */
+  height: 100vh;
 }
 
-.transcript-column, .job-cards-column {
+.transcript-column {
+  overflow-y: auto;
+  padding: 1rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.job-cards-column {
   overflow-y: auto;
   padding: 1rem;
 }
 
 .transcript-container {
-  max-height: calc(100vh - 2rem); /* Adjust for padding */
+  max-height: calc(100vh - 2rem);
 }
 
 .transcript-block {
-  list-style-type: none;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .speaker-id {
-  font-weight: bold;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.25rem;
 }
 
-/* ── Results header ──────────────────────────────────────────────────────────── */
-.dashboard__results-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+.transcript-block p {
+  margin: 0;
+  line-height: 1.5;
+  cursor: text;
+  user-select: text;
 }
 
-.dashboard__results-header-left {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
+.transcript-block p:hover {
+  background-color: rgba(59, 130, 246, 0.05);
 }
 
-.dashboard__results-title {
-  font-size: var(--text-xl);
-  font-weight: 700;
+.floating-menu {
+  position: fixed;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px;
 }
 
-.dashboard__results-count {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.dashboard__results-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.dashboard__export-btn {
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
+.create-card-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--color-text-muted);
-  background: var(--color-surface);
-  transition:
-    border-color var(--duration-fast),
-    color        var(--duration-fast),
-    background   var(--duration-fast);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.dashboard__export-btn:hover {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-  background: var(--color-background);
+.create-card-btn:hover {
+  background: #2563eb;
+}
+
+.create-card-btn:active {
+  background: #1d4ed8;
+}
+
+/* Transcript highlighting */
+.highlight-active {
+  background-color: rgba(250, 204, 21, 0.3);
+  color: #854d0e;
+  padding: 1px 2px;
+  border-radius: 2px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Scroll-to-Source highlighting */
+.transcript-block--highlighted {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-left: 3px solid #3b82f6;
+  transition: all 0.3s ease-in-out;
 }
 </style>

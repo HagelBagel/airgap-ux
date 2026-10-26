@@ -13,9 +13,16 @@
 
 ## Pre-existing breakages (found 2026-10-26)
 
-- [ ] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (file lives in `job-cards/`); breaks `ResearchWorkbench.spec.ts` and `npm run build`
+- [x] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (restored the pre-`a6876f9` component)
 - [ ] Fix `vue-tsc -b` errors: `window.showDirectoryPicker` untyped in `src/stores/vault.ts`; `test` key rejected in `vite.config.ts`
 - [ ] Resolve `vite-plugin-pwa` peer conflict with Vite 8 (npm needs `--legacy-peer-deps`)
+
+## ResearchWorkbench follow-ups (found 2026-10-26)
+
+- [ ] Remove `v-html` from transcript rendering: transcript and evidence text are inserted as raw HTML (XSS risk once researchers upload transcripts). Render highlights as text nodes instead
+- [ ] Make the "Create Card" floating menu keyboard-accessible (currently mouse-selection only; WCAG 2.2 AA)
+- [ ] Replace hard-coded colours in `ResearchWorkbench.vue` with tokens from `src/styles/tokens.css`
+- [ ] Decide whether to bring back the "Desired Outcomes / N outcomes" heading that the stub in `a6876f9` added
 
 ## LPM-001: Select a Vault Folder
 

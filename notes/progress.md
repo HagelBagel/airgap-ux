@@ -388,3 +388,18 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Plain-text transcript parser + optional timestamps; reuse the drop zone for upload.
 - Pre-existing breakages logged in `notes/task-list.md` (`ResearchWorkbench` import, `vue-tsc -b` errors).
+
+---
+
+## 2026-10-26 — Fix ResearchWorkbench (broken import and stub)
+
+### Files changed
+- `components/ResearchWorkbench.vue`: restored to the version before `a6876f9` (identical to `242f539`). That commit had replaced the working `<script setup lang="ts">` component with an unfinished Options API stub that imported `./JobCardsTable.vue` (wrong path), had no `transcriptBlocks` prop, and referenced undefined `sortedCards` / `handleExportJson` / `handleExportCsv`.
+
+### Key decisions
+- Restored rather than patched: fixing only the import made the spec load, but all 5 tests then failed, and the dashboard would have crashed on `sortedCards.length` as soon as results appeared.
+- Dropped the stub's export buttons: `ProcessingStatus` already has them.
+
+### Next steps
+- Follow-ups logged in `notes/task-list.md` under "ResearchWorkbench follow-ups" (`v-html` XSS risk, keyboard access, tokens).
+- `npm run build` still fails on the logged `vue-tsc -b` errors.
