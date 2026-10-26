@@ -14,4 +14,4 @@ const mockModeFromEnv = import.meta.env.VITE_MOCK_MODE;
  * Mock mode default is OFF to ensure dropped files trigger real analysis.
  * Override with VITE_MOCK_MODE=true when intentionally testing mock flows.
  */
-export const MOCK_MODE = mockModeFromEnv === 'false';
+export const MOCK_MODE = mockModeFromEnv === 'true';
