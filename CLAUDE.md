@@ -10,6 +10,7 @@ Sovereign JTBD (package name `sovereign-jtbd`): a Vue 3 app for UX researchers. 
 - `0001`: hosted first, own API + EU Postgres (supersedes the vault ADR `notes/epics/adr.md`)
 - `0002`: audio/video transcription deferred; the code is archived at tag `archive/audio-transcription` and removed from `main`
 - `0003`: AI analysis runs in the browser behind an `AnalysisProvider` interface; a server-side provider may come later
+- `0004`: data model. Transcripts never change after upload; quotes are excerpts (segment + offsets) shared by tags, insights and job-card ratings; scores are computed from ratings. The owner writes the migrations by hand, so review them rather than writing them
 
 The Architecture section below describes the code **as it is today**, including the vault parts that are on their way out. Don't build new features on them.
 
