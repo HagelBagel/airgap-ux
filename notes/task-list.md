@@ -10,6 +10,7 @@
 - [ ] Scaffold own API with SQL migrations
 - [ ] Replace vault flow (HomeView, VaultSelector, requiresVault) with sign-in + project list
 - [ ] Update notes/project-brief.md to the new scope
+- [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 
 ## Pre-existing breakages (found 2026-10-26)
 
