@@ -3,13 +3,14 @@
 - [x] Record decisions as ADRs 0001-0003 and update CLAUDE.md
 - [x] Remove audio/video transcription code and deps (ADR 0002)
 - [x] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser (HFP-001, #16)
+- [ ] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence); settles where parsing runs and how evidence references segments
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
-- [ ] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence)
 - [ ] Scaffold own API with SQL migrations
 - [ ] Replace vault flow (HomeView, VaultSelector, requiresVault) with sign-in + project list
 - [ ] Update notes/project-brief.md to the new scope
+- [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 
 ## Pre-existing breakages (found 2026-10-26)
 
