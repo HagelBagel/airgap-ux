@@ -34,7 +34,7 @@
 - [ ] ~~LPM-001: Store vault directory handle in IndexedDB~~ (dropped: superseded by ADR 0001)
 - [ ] ~~LPM-001: Ensure vault contents are never uploaded to server~~ (dropped: superseded by ADR 0001)
 
-00004 - Bug: still cannot hear processed audio
+00004 - Bug: still cannot hear processed audio (dropped)
 
 DONE 00003 - Add audio processing step to todo list
 
