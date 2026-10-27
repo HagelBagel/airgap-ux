@@ -49,7 +49,10 @@ function formatTime(seconds: number): string {
       >
         <span class="evidence-panel__speaker">
           {{ item.speakerId }}
-          <span class="evidence-panel__timestamp">· {{ formatTime(item.startTime) }}</span>
+          <span
+            v-if="item.startTime !== undefined"
+            class="evidence-panel__timestamp"
+          >· {{ formatTime(item.startTime) }}</span>
         </span>
         <blockquote class="evidence-panel__quote">"{{ item.text }}"</blockquote>
       </li>

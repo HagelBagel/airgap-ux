@@ -2,7 +2,7 @@
 
 - [x] Record decisions as ADRs 0001-0003 and update CLAUDE.md
 - [x] Remove audio/video transcription code and deps (ADR 0002)
-- [ ] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser
+- [x] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser (HFP-001, #16)
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
@@ -34,7 +34,7 @@
 - [ ] ~~LPM-001: Store vault directory handle in IndexedDB~~ (dropped: superseded by ADR 0001)
 - [ ] ~~LPM-001: Ensure vault contents are never uploaded to server~~ (dropped: superseded by ADR 0001)
 
-00004 - Bug: still cannot hear processed audio
+00004 - Bug: still cannot hear processed audio (dropped)
 
 DONE 00003 - Add audio processing step to todo list
 

@@ -211,24 +211,14 @@ export const useResearchStore = defineStore('research', () => {
       averageSatisfaction: 5,
       opportunityScore: computeOpportunityScore(5, 5),
       hasTension: false,
-      evidence: [{
-        speakerId,
-        text,
-        startTime: 0, // Manual entries don't have timestamps
-        endTime: 0,
-      }],
+      evidence: [{ speakerId, text }], // Manual entries don't have timestamps
       speakerOutcomes: [{
         speakerId,
         description: 'Manual Entry',
         importance: 5,
         satisfaction: 5,
         opportunityScore: computeOpportunityScore(5, 5),
-        evidence: [{
-          speakerId,
-          text,
-          startTime: 0,
-          endTime: 0,
-        }],
+        evidence: [{ speakerId, text }],
       }],
       hasBeenManuallyEdited: true,
     };

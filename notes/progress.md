@@ -403,3 +403,21 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Follow-ups logged in `notes/task-list.md` under "ResearchWorkbench follow-ups" (`v-html` XSS risk, keyboard access, tokens).
 - `npm run build` still fails on the logged `vue-tsc -b` errors.
+
+---
+
+## 2026-10-27 — HFP-001: Optional segment timestamps and plain-text transcript parser (#16)
+
+### Files changed
+- `domain/types.ts`: `startTime` / `endTime` are optional on `SpeakerSegment` and `Evidence`.
+- New `domain/transcript/parsePlainTextTranscript.ts` (+ spec): `Name: text` starts a segment, other non-empty lines continue it, text before the first speaker goes to `Unknown`, blank lines are ignored, `\r\n` is handled. Segments carry no timestamps.
+- `stores/useResearchStore.ts`: manual cards no longer get `0` timestamps (spec added).
+- `components/job-cards/JobCardEvidencePanel.vue`: timestamp hidden when absent (new spec).
+
+### Key decisions
+- Speaker prefix is a short name (max 40 chars, starting with a letter or digit, then letters, digits, spaces, `_ . ' -`) followed by a colon. A line like `Note: ...` inside an answer will start a new "Note" segment; acceptable for now.
+- A speaker line with no text and nothing after it is dropped rather than kept as an empty segment.
+- Worker unchanged: it already copies the segment's timestamps, which are now simply absent for text transcripts.
+
+### Next steps
+- Rework `FileDropzone` for `.txt` upload and wire it to `parsePlainTextTranscript` + `analyzeSegments`.
