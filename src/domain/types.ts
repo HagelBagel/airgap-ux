@@ -3,20 +3,20 @@
  * All AI inference and scoring results are represented with these interfaces.
  */
 
-/** A timestamped speech segment attributed to a single speaker. */
+/** A speech segment attributed to a single speaker. Text transcripts have no timestamps. */
 export interface SpeakerSegment {
   speakerId: string;
   text: string;
-  startTime: number; // seconds
-  endTime: number;   // seconds
+  startTime?: number; // seconds
+  endTime?: number;   // seconds
 }
 
 /** A verbatim (or near-verbatim) quote used to justify an Importance or Satisfaction score. */
 export interface Evidence {
   speakerId: string;
   text: string;
-  startTime: number; // seconds
-  endTime: number;   // seconds
+  startTime?: number; // seconds
+  endTime?: number;   // seconds
 }
 
 /**

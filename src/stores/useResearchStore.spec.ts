@@ -116,3 +116,19 @@ describe('useResearchStore.analyzeSegments', () => {
     expect(worker.postMessage).toHaveBeenCalledTimes(1) // only LOAD_MODELS
   })
 })
+
+describe('useResearchStore.createManualCard', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('adds evidence without inventing timestamps', () => {
+    const store = useResearchStore()
+
+    store.createManualCard('Approvals take days.', 'Speaker_01')
+
+    const card = store.currentProject!.jobCards[0]!
+    expect(card.evidence).toEqual([{ speakerId: 'Speaker_01', text: 'Approvals take days.' }])
+    expect(card.speakerOutcomes[0]!.evidence).toEqual(card.evidence)
+  })
+})
