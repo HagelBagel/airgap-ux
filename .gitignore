@@ -13,6 +13,8 @@ dist-ssr
 *.local
 test_media
 
+# Misc
+/notes/llm-brief.md
 
 # Editor directories and files
 .vscode/*

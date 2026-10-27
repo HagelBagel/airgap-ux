@@ -421,3 +421,22 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 
 ### Next steps
 - Rework `FileDropzone` for `.txt` upload and wire it to `parsePlainTextTranscript` + `analyzeSegments`.
+
+---
+
+## 2026-10-27 — HFP-002: Data model ADR
+
+### Files changed
+- New `docs/adr/0004-data-model.md`: tables and columns for users, projects, participants, transcripts, segments, excerpts, tags, insights, job cards, outcome ratings and the three join tables.
+- `CLAUDE.md`: lists ADR 0004.
+- `notes/task-list.md`: schema item ticked; migration tool, migrations and follow-ups added.
+- `.gitignore`: ignores `notes/llm-brief.md`.
+
+### Key decisions
+- Transcripts never change after upload; a changed file becomes a new version (`replaces_transcript_id`), detected by `content_hash` and filename.
+- One `excerpts` table (segment + offsets) for all quotes; tags, insights and ratings link to it.
+- Speakers are `participants` with a pseudonymous label. Scores are computed from `outcome_ratings`; the sliders write a nullable override on the job card.
+- Join tables use composite keys, the one exception to ADR 0001's UUID rule.
+
+### Next steps
+- Owner picks a migration tool and local Postgres, then writes the migrations by hand; Claude reviews.

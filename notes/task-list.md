@@ -3,7 +3,9 @@
 - [x] Record decisions as ADRs 0001-0003 and update CLAUDE.md
 - [x] Remove audio/video transcription code and deps (ADR 0002)
 - [x] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser (HFP-001, #16)
-- [ ] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence); settles where parsing runs and how evidence references segments
+- [x] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence); settles where parsing runs and how evidence references segments (HFP-002, ADR 0004)
+- [ ] Choose migration tool (suggested: dbmate) and local Postgres setup (suggested: Docker `postgres:17`)
+- [ ] Write Postgres migrations from ADR 0004 (owner writes these by hand; Claude reviews)
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
@@ -11,6 +13,10 @@
 - [ ] Replace vault flow (HomeView, VaultSelector, requiresVault) with sign-in + project list
 - [ ] Update notes/project-brief.md to the new scope
 - [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
+- [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)
+- [ ] Rework `mergeCards` to ADR 0004's merge rule (primary card's rating per participant wins) and compute averages from ratings, not from card averages
+- [ ] Later: move excerpts from an old transcript version to a new one (re-anchor by exact text, flag misses for review)
+- [ ] Block 2: decide whether to remove participant names from `raw_text` / segment text on upload (ADR 0004 consequence)
 
 ## Pre-existing breakages (found 2026-10-26)
 
