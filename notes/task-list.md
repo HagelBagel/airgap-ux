@@ -4,7 +4,7 @@
 - [x] Remove audio/video transcription code and deps (ADR 0002)
 - [x] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser (HFP-001, #16)
 - [x] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence); settles where parsing runs and how evidence references segments (HFP-002, ADR 0004)
-- [ ] Choose migration tool (suggested: dbmate) and local Postgres setup (suggested: Docker `postgres:17`)
+- [x] Choose migration tool (suggested: dbmate) and local Postgres setup (suggested: Docker `postgres:17`)
 - [ ] Write Postgres migrations from ADR 0004 (owner writes these by hand; Claude reviews)
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
