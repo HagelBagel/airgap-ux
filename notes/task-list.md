@@ -18,6 +18,15 @@
 - [ ] Later: move excerpts from an old transcript version to a new one (re-anchor by exact text, flag misses for review)
 - [ ] Block 2: decide whether to remove participant names from `raw_text` / segment text on upload (ADR 0004 consequence)
 
+## Rename to AirGap UX, drop brand names (found 2026-10-31)
+
+The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the brand names "Strategyn" or "ODI" (use "opportunity score" instead). The README is already done. Do this on its own `chore/` branch.
+
+- [ ] Rename the package `sovereign-jtbd` in `package.json` / `package-lock.json`, and the app title in `index.html`
+- [ ] Rename `src/domain/strategyn/` and update its imports; remove "Strategyn"/"ODI" from code, comments and UI text (`types.ts`, `ai.worker.ts`, `messages.ts`, `useResearchStore.ts` + spec, `mockData.ts`, `JobCard.vue`, `ProcessingStatus.vue`, `ResearchDashboard.vue`, `tokens.css`)
+- [ ] Rename the local DB user/name `sovereign` in `compose.yaml`, `.env` (`DATABASE_URL`) and the README `psql` command. Needs `docker compose down -v`, which wipes the local database
+- [ ] Update `CLAUDE.md`, `.github/prompts/system.prompt.md` and `notes/project-brief.md`; leave dated history (`progress.md`, `market-research.md`) as is
+
 ## Pre-existing breakages (found 2026-10-26)
 
 - [x] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (restored the pre-`a6876f9` component)
