@@ -86,6 +86,27 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: transcripts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.transcripts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL,
+    title text NOT NULL,
+    original_filename text,
+    raw_text text NOT NULL,
+    content_hash text NOT NULL,
+    source text NOT NULL,
+    replaces_transcript_id uuid,
+    interviewed_on date,
+    CONSTRAINT transcripts_check CHECK ((replaces_transcript_id <> id)),
+    CONSTRAINT transcripts_source_check CHECK ((source = 'upload'::text))
+);
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -131,6 +152,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: transcripts transcripts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transcripts
+    ADD CONSTRAINT transcripts_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -154,6 +183,13 @@ CREATE INDEX projects_owner_id_idx ON public.projects USING btree (owner_id);
 
 
 --
+-- Name: transcripts_project_id_content_hash_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX transcripts_project_id_content_hash_idx ON public.transcripts USING btree (project_id, content_hash);
+
+
+--
 -- Name: participants participants_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -165,6 +201,13 @@ CREATE TRIGGER participants_set_updated_at BEFORE UPDATE ON public.participants 
 --
 
 CREATE TRIGGER projects_set_updated_at BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: transcripts transcripts_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER transcripts_set_updated_at BEFORE UPDATE ON public.transcripts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -191,6 +234,22 @@ ALTER TABLE ONLY public.projects
 
 
 --
+-- Name: transcripts transcripts_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transcripts
+    ADD CONSTRAINT transcripts_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: transcripts transcripts_replaces_transcript_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transcripts
+    ADD CONSTRAINT transcripts_replaces_transcript_id_fkey FOREIGN KEY (replaces_transcript_id) REFERENCES public.transcripts(id) ON DELETE SET NULL;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -205,4 +264,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261030094000'),
     ('20261030094328'),
     ('20261102075926'),
-    ('20261102093301');
+    ('20261102093301'),
+    ('20261102095531');
