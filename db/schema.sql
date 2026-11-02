@@ -81,6 +81,23 @@ CREATE TABLE public.job_cards (
 
 
 --
+-- Name: outcome_ratings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.outcome_ratings (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    job_card_id uuid NOT NULL,
+    participant_id uuid NOT NULL,
+    importance smallint NOT NULL,
+    satisfaction smallint NOT NULL,
+    CONSTRAINT outcome_ratings_importance_check CHECK (((importance >= 1) AND (importance <= 10))),
+    CONSTRAINT outcome_ratings_satisfaction_check CHECK (((satisfaction >= 1) AND (satisfaction <= 10)))
+);
+
+
+--
 -- Name: participants; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -207,6 +224,22 @@ ALTER TABLE ONLY public.job_cards
 
 
 --
+-- Name: outcome_ratings outcome_ratings_job_card_id_participant_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outcome_ratings
+    ADD CONSTRAINT outcome_ratings_job_card_id_participant_id_key UNIQUE (job_card_id, participant_id);
+
+
+--
+-- Name: outcome_ratings outcome_ratings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outcome_ratings
+    ADD CONSTRAINT outcome_ratings_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: participants participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -309,6 +342,13 @@ CREATE INDEX job_cards_project_id_idx ON public.job_cards USING btree (project_i
 
 
 --
+-- Name: outcome_ratings_participant_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX outcome_ratings_participant_id_idx ON public.outcome_ratings USING btree (participant_id);
+
+
+--
 -- Name: projects_owner_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -341,6 +381,13 @@ CREATE TRIGGER insights_set_updated_at BEFORE UPDATE ON public.insights FOR EACH
 --
 
 CREATE TRIGGER job_cards_set_updated_at BEFORE UPDATE ON public.job_cards FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: outcome_ratings outcome_ratings_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER outcome_ratings_set_updated_at BEFORE UPDATE ON public.outcome_ratings FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -399,6 +446,22 @@ ALTER TABLE ONLY public.insights
 
 ALTER TABLE ONLY public.job_cards
     ADD CONSTRAINT job_cards_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: outcome_ratings outcome_ratings_job_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outcome_ratings
+    ADD CONSTRAINT outcome_ratings_job_card_id_fkey FOREIGN KEY (job_card_id) REFERENCES public.job_cards(id) ON DELETE CASCADE;
+
+
+--
+-- Name: outcome_ratings outcome_ratings_participant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outcome_ratings
+    ADD CONSTRAINT outcome_ratings_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES public.participants(id) ON DELETE CASCADE;
 
 
 --
@@ -477,4 +540,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102111045'),
     ('20261102111815'),
     ('20261102112327'),
-    ('20261102113141');
+    ('20261102113141'),
+    ('20261102144517');
