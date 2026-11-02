@@ -119,6 +119,30 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: segments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.segments (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    transcript_id uuid NOT NULL,
+    ordinal integer NOT NULL,
+    participant_id uuid,
+    speaker_label text,
+    text text NOT NULL,
+    start_char integer NOT NULL,
+    end_char integer NOT NULL,
+    start_time interval,
+    end_time interval,
+    CONSTRAINT segments_check CHECK (((start_char >= 0) AND (end_char > start_char))),
+    CONSTRAINT segments_check1 CHECK (((start_time >= '00:00:00'::interval) AND (end_time >= start_time))),
+    CONSTRAINT segments_check2 CHECK (((start_time IS NULL) = (end_time IS NULL))),
+    CONSTRAINT segments_speaker_label_check CHECK ((speaker_label <> ''::text))
+);
+
+
+--
 -- Name: tags; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -215,6 +239,22 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: segments segments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: segments segments_transcript_id_ordinal_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_transcript_id_ordinal_key UNIQUE (transcript_id, ordinal);
+
+
+--
 -- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -276,6 +316,13 @@ CREATE INDEX projects_owner_id_idx ON public.projects USING btree (owner_id);
 
 
 --
+-- Name: segments_participant_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX segments_participant_id_idx ON public.segments USING btree (participant_id);
+
+
+--
 -- Name: transcripts_project_id_content_hash_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -308,6 +355,13 @@ CREATE TRIGGER participants_set_updated_at BEFORE UPDATE ON public.participants 
 --
 
 CREATE TRIGGER projects_set_updated_at BEFORE UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: segments segments_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER segments_set_updated_at BEFORE UPDATE ON public.segments FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -364,6 +418,22 @@ ALTER TABLE ONLY public.projects
 
 
 --
+-- Name: segments segments_participant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES public.participants(id);
+
+
+--
+-- Name: segments segments_transcript_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_transcript_id_fkey FOREIGN KEY (transcript_id) REFERENCES public.transcripts(id) ON DELETE CASCADE;
+
+
+--
 -- Name: tags tags_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -406,4 +476,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102095531'),
     ('20261102111045'),
     ('20261102111815'),
-    ('20261102112327');
+    ('20261102112327'),
+    ('20261102113141');

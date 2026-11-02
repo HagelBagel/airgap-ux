@@ -43,7 +43,12 @@ Each project has `participants` with a pseudonymous `label` ("P3") and an option
 
 ### Tables
 
-Every table has `id uuid` primary key and `created_at` / `updated_at`, except the join tables (see below), which have a composite primary key and `created_at` only. Every foreign key cascades on delete, so deleting a user or project deletes everything under it. The one exception is `transcripts.replaces_transcript_id`, which is set to null on delete: a cascade there would delete every newer version along with the old one. Deleting a project still removes all versions, through `project_id`.
+Every table has `id uuid` primary key and `created_at` / `updated_at`, except the join tables (see below), which have a composite primary key and `created_at` only. Every foreign key cascades on delete, so deleting a user or project deletes everything under it. There are two exceptions:
+
+- `transcripts.replaces_transcript_id` is set to null on delete: a cascade there would delete every newer version along with the old one.
+- `segments.participant_id` blocks the delete (`NO ACTION`): a cascade would cut the participant's segments, and every quote in them, out of an immutable transcript, and setting it to null would leave those quotes without a speaker. Deleting a participant means first moving their segments to another participant (a merge). It does not erase what they said; that stays in `raw_text` and the segment text (see Consequences).
+
+Deleting a project still removes everything, including all transcript versions and participants, because both exceptions are resolved within the same delete.
 
 | Table | Columns |
 |---|---|
