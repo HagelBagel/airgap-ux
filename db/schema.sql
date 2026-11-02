@@ -62,6 +62,25 @@ CREATE TABLE public.insights (
 
 
 --
+-- Name: job_cards; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.job_cards (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL,
+    description text NOT NULL,
+    origin text NOT NULL,
+    override_importance smallint,
+    override_satisfaction smallint,
+    CONSTRAINT job_cards_origin_check CHECK ((origin = ANY (ARRAY['ai'::text, 'manual'::text]))),
+    CONSTRAINT job_cards_override_importance_check CHECK (((override_importance >= 1) AND (override_importance <= 10))),
+    CONSTRAINT job_cards_override_satisfaction_check CHECK (((override_satisfaction >= 1) AND (override_satisfaction <= 10)))
+);
+
+
+--
 -- Name: participants; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -156,6 +175,14 @@ ALTER TABLE ONLY public.insights
 
 
 --
+-- Name: job_cards job_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.job_cards
+    ADD CONSTRAINT job_cards_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: participants participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -235,6 +262,13 @@ CREATE INDEX insights_project_id_idx ON public.insights USING btree (project_id)
 
 
 --
+-- Name: job_cards_project_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX job_cards_project_id_idx ON public.job_cards USING btree (project_id);
+
+
+--
 -- Name: projects_owner_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -253,6 +287,13 @@ CREATE INDEX transcripts_project_id_content_hash_idx ON public.transcripts USING
 --
 
 CREATE TRIGGER insights_set_updated_at BEFORE UPDATE ON public.insights FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: job_cards job_cards_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER job_cards_set_updated_at BEFORE UPDATE ON public.job_cards FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -296,6 +337,14 @@ CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON public.users FOR EACH ROW E
 
 ALTER TABLE ONLY public.insights
     ADD CONSTRAINT insights_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+
+--
+-- Name: job_cards job_cards_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.job_cards
+    ADD CONSTRAINT job_cards_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -356,4 +405,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102093301'),
     ('20261102095531'),
     ('20261102111045'),
-    ('20261102111815');
+    ('20261102111815'),
+    ('20261102112327');
