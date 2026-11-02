@@ -48,6 +48,17 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: excerpt_tags; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.excerpt_tags (
+    excerpt_id uuid NOT NULL,
+    tag_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
 -- Name: excerpts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -59,6 +70,17 @@ CREATE TABLE public.excerpts (
     start_offset integer NOT NULL,
     end_offset integer NOT NULL,
     CONSTRAINT excerpts_check CHECK (((start_offset >= 0) AND (end_offset > start_offset)))
+);
+
+
+--
+-- Name: insight_excerpts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.insight_excerpts (
+    insight_id uuid NOT NULL,
+    excerpt_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -138,6 +160,17 @@ CREATE TABLE public.projects (
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     owner_id uuid NOT NULL,
     name text NOT NULL
+);
+
+
+--
+-- Name: rating_excerpts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.rating_excerpts (
+    rating_id uuid NOT NULL,
+    excerpt_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -223,6 +256,14 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: excerpt_tags excerpt_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpt_tags
+    ADD CONSTRAINT excerpt_tags_pkey PRIMARY KEY (excerpt_id, tag_id);
+
+
+--
 -- Name: excerpts excerpts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -236,6 +277,14 @@ ALTER TABLE ONLY public.excerpts
 
 ALTER TABLE ONLY public.excerpts
     ADD CONSTRAINT excerpts_segment_id_start_offset_end_offset_key UNIQUE (segment_id, start_offset, end_offset);
+
+
+--
+-- Name: insight_excerpts insight_excerpts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insight_excerpts
+    ADD CONSTRAINT insight_excerpts_pkey PRIMARY KEY (insight_id, excerpt_id);
 
 
 --
@@ -292,6 +341,14 @@ ALTER TABLE ONLY public.participants
 
 ALTER TABLE ONLY public.projects
     ADD CONSTRAINT projects_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: rating_excerpts rating_excerpts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.rating_excerpts
+    ADD CONSTRAINT rating_excerpts_pkey PRIMARY KEY (rating_id, excerpt_id);
 
 
 --
@@ -359,6 +416,20 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: excerpt_tags_tag_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX excerpt_tags_tag_id_idx ON public.excerpt_tags USING btree (tag_id);
+
+
+--
+-- Name: insight_excerpts_excerpt_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX insight_excerpts_excerpt_id_idx ON public.insight_excerpts USING btree (excerpt_id);
+
+
+--
 -- Name: insights_project_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -384,6 +455,13 @@ CREATE INDEX outcome_ratings_participant_id_idx ON public.outcome_ratings USING 
 --
 
 CREATE INDEX projects_owner_id_idx ON public.projects USING btree (owner_id);
+
+
+--
+-- Name: rating_excerpts_excerpt_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX rating_excerpts_excerpt_id_idx ON public.rating_excerpts USING btree (excerpt_id);
 
 
 --
@@ -471,11 +549,43 @@ CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON public.users FOR EACH ROW E
 
 
 --
+-- Name: excerpt_tags excerpt_tags_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpt_tags
+    ADD CONSTRAINT excerpt_tags_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: excerpt_tags excerpt_tags_tag_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpt_tags
+    ADD CONSTRAINT excerpt_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
+
+
+--
 -- Name: excerpts excerpts_segment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.excerpts
     ADD CONSTRAINT excerpts_segment_id_fkey FOREIGN KEY (segment_id) REFERENCES public.segments(id) ON DELETE CASCADE;
+
+
+--
+-- Name: insight_excerpts insight_excerpts_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insight_excerpts
+    ADD CONSTRAINT insight_excerpts_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: insight_excerpts insight_excerpts_insight_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insight_excerpts
+    ADD CONSTRAINT insight_excerpts_insight_id_fkey FOREIGN KEY (insight_id) REFERENCES public.insights(id) ON DELETE CASCADE;
 
 
 --
@@ -524,6 +634,22 @@ ALTER TABLE ONLY public.participants
 
 ALTER TABLE ONLY public.projects
     ADD CONSTRAINT projects_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: rating_excerpts rating_excerpts_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.rating_excerpts
+    ADD CONSTRAINT rating_excerpts_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
+
+
+--
+-- Name: rating_excerpts rating_excerpts_rating_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.rating_excerpts
+    ADD CONSTRAINT rating_excerpts_rating_id_fkey FOREIGN KEY (rating_id) REFERENCES public.outcome_ratings(id) ON DELETE CASCADE;
 
 
 --
@@ -588,4 +714,7 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102112327'),
     ('20261102113141'),
     ('20261102144517'),
-    ('20261102150501');
+    ('20261102150501'),
+    ('20261102160000'),
+    ('20261102160100'),
+    ('20261102160200');
