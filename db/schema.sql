@@ -48,6 +48,21 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: excerpts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.excerpts (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    segment_id uuid NOT NULL,
+    start_offset integer NOT NULL,
+    end_offset integer NOT NULL,
+    CONSTRAINT excerpts_check CHECK (((start_offset >= 0) AND (end_offset > start_offset)))
+);
+
+
+--
 -- Name: insights; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -205,6 +220,22 @@ CREATE TABLE public.users (
     display_name text,
     email public.citext NOT NULL
 );
+
+
+--
+-- Name: excerpts excerpts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpts
+    ADD CONSTRAINT excerpts_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: excerpts excerpts_segment_id_start_offset_end_offset_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpts
+    ADD CONSTRAINT excerpts_segment_id_start_offset_end_offset_key UNIQUE (segment_id, start_offset, end_offset);
 
 
 --
@@ -370,6 +401,13 @@ CREATE INDEX transcripts_project_id_content_hash_idx ON public.transcripts USING
 
 
 --
+-- Name: excerpts excerpts_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER excerpts_set_updated_at BEFORE UPDATE ON public.excerpts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: insights insights_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -430,6 +468,14 @@ CREATE TRIGGER transcripts_set_updated_at BEFORE UPDATE ON public.transcripts FO
 --
 
 CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: excerpts excerpts_segment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpts
+    ADD CONSTRAINT excerpts_segment_id_fkey FOREIGN KEY (segment_id) REFERENCES public.segments(id) ON DELETE CASCADE;
 
 
 --
@@ -541,4 +587,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102111815'),
     ('20261102112327'),
     ('20261102113141'),
-    ('20261102144517');
+    ('20261102144517'),
+    ('20261102150501');
