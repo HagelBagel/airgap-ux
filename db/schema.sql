@@ -86,6 +86,20 @@ CREATE TABLE public.schema_migrations (
 
 
 --
+-- Name: tags; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.tags (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL,
+    name public.citext NOT NULL,
+    description text
+);
+
+
+--
 -- Name: transcripts; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -152,6 +166,22 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tags tags_project_id_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_project_id_name_key UNIQUE (project_id, name);
+
+
+--
 -- Name: transcripts transcripts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -204,6 +234,13 @@ CREATE TRIGGER projects_set_updated_at BEFORE UPDATE ON public.projects FOR EACH
 
 
 --
+-- Name: tags tags_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tags_set_updated_at BEFORE UPDATE ON public.tags FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: transcripts transcripts_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -231,6 +268,14 @@ ALTER TABLE ONLY public.participants
 
 ALTER TABLE ONLY public.projects
     ADD CONSTRAINT projects_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- Name: tags tags_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -265,4 +310,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261030094328'),
     ('20261102075926'),
     ('20261102093301'),
-    ('20261102095531');
+    ('20261102095531'),
+    ('20261102111045');
