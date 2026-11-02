@@ -48,6 +48,20 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: insights; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.insights (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL,
+    title text NOT NULL,
+    body text NOT NULL
+);
+
+
+--
 -- Name: participants; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -134,6 +148,14 @@ CREATE TABLE public.users (
 
 
 --
+-- Name: insights insights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insights
+    ADD CONSTRAINT insights_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: participants participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -206,6 +228,13 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: insights_project_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX insights_project_id_idx ON public.insights USING btree (project_id);
+
+
+--
 -- Name: projects_owner_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -217,6 +246,13 @@ CREATE INDEX projects_owner_id_idx ON public.projects USING btree (owner_id);
 --
 
 CREATE INDEX transcripts_project_id_content_hash_idx ON public.transcripts USING btree (project_id, content_hash);
+
+
+--
+-- Name: insights insights_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER insights_set_updated_at BEFORE UPDATE ON public.insights FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -252,6 +288,14 @@ CREATE TRIGGER transcripts_set_updated_at BEFORE UPDATE ON public.transcripts FO
 --
 
 CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: insights insights_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insights
+    ADD CONSTRAINT insights_project_id_fkey FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
 
 --
@@ -311,4 +355,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102075926'),
     ('20261102093301'),
     ('20261102095531'),
-    ('20261102111045');
+    ('20261102111045'),
+    ('20261102111815');
