@@ -440,3 +440,9 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 
 ### Next steps
 - Owner picks a migration tool and local Postgres, then writes the migrations by hand; Claude reviews.
+
+## 2026-10-27 — HFP-003: Local Postgres setup
+- We settled on dbmate for the database migration tool
+- Put the DATABASE_URL in .env
+- Installed postgres:17 image
+- Postgres port (5432) bound to 127.0.0.1 only, so the dev database (with its committed password) isn't reachable from the local network. 

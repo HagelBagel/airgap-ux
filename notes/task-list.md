@@ -4,7 +4,7 @@
 - [x] Remove audio/video transcription code and deps (ADR 0002)
 - [x] Make `SpeakerSegment` timestamps optional; add plain-text transcript parser (HFP-001, #16)
 - [x] Draft Postgres schema (users, projects, transcripts, segments, tags, insights, evidence); settles where parsing runs and how evidence references segments (HFP-002, ADR 0004)
-- [ ] Choose migration tool (suggested: dbmate) and local Postgres setup (suggested: Docker `postgres:17`)
+- [x] Choose migration tool (suggested: dbmate) and local Postgres setup (suggested: Docker `postgres:17`)
 - [ ] Write Postgres migrations from ADR 0004 (owner writes these by hand; Claude reviews)
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
@@ -17,6 +17,15 @@
 - [ ] Rework `mergeCards` to ADR 0004's merge rule (primary card's rating per participant wins) and compute averages from ratings, not from card averages
 - [ ] Later: move excerpts from an old transcript version to a new one (re-anchor by exact text, flag misses for review)
 - [ ] Block 2: decide whether to remove participant names from `raw_text` / segment text on upload (ADR 0004 consequence)
+
+## Rename to AirGap UX, drop brand names (found 2026-10-31)
+
+The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the brand names "Strategyn" or "ODI" (use "opportunity score" instead). The README is already done. Do this on its own `chore/` branch.
+
+- [ ] Rename the package `sovereign-jtbd` in `package.json` / `package-lock.json`, and the app title in `index.html`
+- [ ] Rename `src/domain/strategyn/` and update its imports; remove "Strategyn"/"ODI" from code, comments and UI text (`types.ts`, `ai.worker.ts`, `messages.ts`, `useResearchStore.ts` + spec, `mockData.ts`, `JobCard.vue`, `ProcessingStatus.vue`, `ResearchDashboard.vue`, `tokens.css`)
+- [ ] Rename the local DB user/name `sovereign` in `compose.yaml`, `.env` (`DATABASE_URL`) and the README `psql` command. Needs `docker compose down -v`, which wipes the local database
+- [ ] Update `CLAUDE.md`, `.github/prompts/system.prompt.md` and `notes/project-brief.md`; leave dated history (`progress.md`, `market-research.md`) as is
 
 ## Pre-existing breakages (found 2026-10-26)
 
