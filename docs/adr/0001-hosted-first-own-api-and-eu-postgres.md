@@ -42,3 +42,11 @@ Schema rules that keep later options open:
 ## Future option: local / air-gapped mode
 
 A local-only mode, where data stays on the researcher's machine, remains a possible add-on. It is not designed for now. Moving from hosted to local later would mean running the same schema locally (for example SQLite or PGlite) and dealing with sync. Neither direction is cheap, so this is deliberately left out of scope.
+
+What UUID keys do and don't solve for sync:
+
+- **They solve id collisions.** Any machine can create rows without coordinating, and a row keeps its id when it moves between a local database and the server, so foreign keys stay valid. With sequential ids, two databases would both hand out id 42 for different rows, and syncing would mean renumbering rows and every foreign key that points at them.
+- **They don't solve semantic duplicates.** The same thing created on two machines gets two different UUIDs. Sync has to decide, table by table, when two rows are "the same" and merge them:
+  - **Tags and participants** are unique by name/label per project (`UNIQUE (project_id, name)` and `UNIQUE (project_id, label)`). Two machines creating the tag "frustration" offline will conflict on sync. Merging means keeping one row, repointing `excerpt_tags` (or ratings, for participants) at it and deleting the other.
+  - **Transcripts** are not unique by title; a title is a label, not an identity. Two transcripts with the same title and different text are two interviews. The same text uploaded twice is found through `content_hash` (indexed, deliberately not unique). Because transcripts never change after upload ([0004](0004-data-model.md)), identical text gives identical segments, so excerpts can be moved to the surviving transcript with their offsets intact. Excerpts that land on the same span hit `UNIQUE (segment_id, start_offset, end_offset)`, and their tags, insights and ratings must be combined onto one excerpt.
+- Conflicting edits to the same row and propagating deletes are a separate problem that UUIDs don't touch either.

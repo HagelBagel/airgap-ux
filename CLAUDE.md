@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Sovereign JTBD (package name `sovereign-jtbd`): a Vue 3 app for UX researchers. Researchers sign in, upload interview transcripts (text), tag them, link insights to quotes, and run Jobs-to-be-Done analysis with a small LLM in the browser. Outcomes are scored with the Strategyn/ODI Opportunity formula. Product context: `notes/project-brief.md`; story backlog: `notes/epics/user-stories.md`.
+AirGap UX: a Vue 3 app for UX researchers. Researchers sign in, upload interview transcripts (text), tag them, link insights to quotes, and run Jobs-to-be-Done analysis with a small LLM in the browser. Outcomes are scored with the Strategyn/ODI Opportunity formula. Product context: `notes/project-brief.md`; story backlog: `notes/epics/user-stories.md`.
 
 **Direction (2026-10-26):** the app is moving from local-first and air-gapped to **hosted first with our own API and Postgres in the EU**. Read `docs/adr/` before designing anything:
 - `0001`: hosted first, own API + EU Postgres (supersedes the vault ADR `notes/epics/adr.md`)
