@@ -9,7 +9,7 @@
  * This lets UI development and integration testing proceed independently.
  *
  * Message protocol: see workers/messages.ts
- * Scoring formula:  see domain/strategyn/opportunityScore.ts
+ * Scoring formula:  see domain/opportunity/opportunityScore.ts
  */
 
 import {
@@ -20,7 +20,7 @@ import {
 
 import type { WorkerInMessage, WorkerOutMessage } from './messages';
 import type { Evidence, JobCard, SpeakerOutcome, SpeakerSegment } from '../domain/types';
-import { computeOpportunityScore } from '../domain/strategyn/opportunityScore';
+import { computeOpportunityScore } from '../domain/opportunity/opportunityScore';
 import { batchSegmentsBySpeaker, type SpeakerBatch } from '../services/ai/jtbdExtractionPipeline';
 import { MOCK_JOB_CARDS } from '../services/ai/mockData';
 
@@ -77,8 +77,8 @@ self.onmessage = async (event: MessageEvent<WorkerInMessage>): Promise<void> => 
       case 'LOAD_MODELS':
         await handleLoadModels(msg.payload.mockMode);
         break;
-      case 'RUN_STRATEGYN_ANALYSIS':
-        await handleRunStrategynAnalysis(msg.payload);
+      case 'RUN_JTBD_ANALYSIS':
+        await handleRunJtbdAnalysis(msg.payload);
         break;
     }
   } catch (err) {
@@ -111,8 +111,8 @@ async function handleLoadModels(mockMode: boolean): Promise<void> {
   post({ type: 'MODELS_READY', payload: { mockMode: false } });
 }
 
-// ─── Handler: RUN_STRATEGYN_ANALYSIS ──────────────────────────────────────────
-async function handleRunStrategynAnalysis(payload: {
+// ─── Handler: RUN_JTBD_ANALYSIS ──────────────────────────────────────────
+async function handleRunJtbdAnalysis(payload: {
   segments: SpeakerSegment[];
   mockMode: boolean;
 }): Promise<void> {
@@ -126,23 +126,23 @@ async function handleRunStrategynAnalysis(payload: {
     return;
   }
 
-  const { jobCards, usedFallback } = await runStrategynAnalysis(payload.segments);
+  const { jobCards, usedFallback } = await runJtbdAnalysis(payload.segments);
   post({ type: 'ANALYSIS_COMPLETE', payload: { jobCards, usedFallback } });
 }
 
-// ─── Core: Strategyn Analysis ──────────────────────────────────────────────────
+// ─── Core: JTBD Analysis ───────────────────────────────────────────────────────
 /**
- * runStrategynAnalysis
+ * runJtbdAnalysis
  *
  * 1. Groups transcript segments by speaker into consecutive "speaker turns" (SpeakerBatch).
  * 2. Formats each turn as a metadata-prefixed context block for the LLM.
  * 3. Sends each block to the LLM and accumulates outcomes from all blocks.
  * 4. Merges outcomes with identical descriptions from different speakers (synthesis).
- * 5. Applies the Strategyn formula: opportunityScore = I + max(I − S, 0)
+ * 5. Applies the opportunity score formula: opportunityScore = I + max(I − S, 0)
  * 6. Matches each LLM-provided evidence quote back to a timestamped segment.
  * 7. Returns an array of JobCards ready for the Pinia store.
  */
-async function runStrategynAnalysis(
+async function runJtbdAnalysis(
   segments: SpeakerSegment[],
 ): Promise<{ jobCards: JobCard[]; usedFallback: boolean }> {
   if (!llm) throw new Error('LLM not loaded — send LOAD_MODELS first.');

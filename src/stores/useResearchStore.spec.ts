@@ -55,7 +55,7 @@ describe('useResearchStore.analyzeSegments', () => {
     worker.emit({ type: 'MODELS_READY', payload: { mockMode: false } })
 
     expect(worker.postMessage).toHaveBeenLastCalledWith({
-      type: 'RUN_STRATEGYN_ANALYSIS',
+      type: 'RUN_JTBD_ANALYSIS',
       payload: { segments, mockMode: false },
     })
   })
@@ -72,7 +72,7 @@ describe('useResearchStore.analyzeSegments', () => {
     expect(MockWorker.instances).toHaveLength(1)
     expect(worker.postMessage).toHaveBeenCalledTimes(1)
     expect(worker.postMessage).toHaveBeenCalledWith({
-      type: 'RUN_STRATEGYN_ANALYSIS',
+      type: 'RUN_JTBD_ANALYSIS',
       payload: { segments, mockMode: false },
     })
   })

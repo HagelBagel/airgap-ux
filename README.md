@@ -74,7 +74,7 @@ Day-to-day commands:
 | `docker compose stop` | Stop it (data stays) |
 | `docker compose down` | Remove the container (data stays in the volume) |
 | `docker compose down -v` | Remove the container **and** the volume, to start fresh |
-| `docker compose exec db psql -U sovereign -d sovereign` | Open a `psql` shell |
+| `docker compose exec db psql -U airgap -d airgap` | Open a `psql` shell |
 | `npx dbmate new <name>` | Create a new migration file |
 | `npx dbmate rollback` | Roll back the latest migration |
 

@@ -1,5 +1,5 @@
 /**
- * Core domain types for Sovereign JTBD.
+ * Core domain types for AirGap UX.
  * All AI inference and scoring results are represented with these interfaces.
  */
 

@@ -7,7 +7,7 @@
  */
 
 import type { Evidence, JobCard, SpeakerSegment } from '../../domain/types';
-import { computeOpportunityScore } from '../../domain/strategyn/opportunityScore';
+import { computeOpportunityScore } from '../../domain/opportunity/opportunityScore';
 
 // Realistic UX research scenario: project management software.
 // Used when mockMode: true — lets UI development proceed without a GPU.

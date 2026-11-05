@@ -10,7 +10,7 @@ I want to build the UI using Vue 3 SFCs with Scoped CSS. Do not use Tailwind or 
 
 Always architect heavy AI tasks (transcription, scoring) using Web Workers. Provide a clear communication bridge between the worker.js and the Vue Pinia store to ensure the UI thread remains 60fps.
 
-Strictly adhere to the Strategyn/ODI formula for Opportunity Scores: Importance+max(Importance−Satisfaction,0). When generating drafts, the AI logic should explicitly output the 'Evidence' (quotes) alongside the scores to ensure human verifiability.
+Strictly adhere to the opportunity score formula: Importance+max(Importance−Satisfaction,0). When generating drafts, the AI logic should explicitly output the 'Evidence' (quotes) alongside the scores to ensure human verifiability.
 
 Use transformers.js v3 for all model logic. Ensure models are loaded with dtype: 'fp16' or quantized: true to optimize for browser VRAM. Implement a progress-bar state for model downloading and 'warming up' to improve UX.
 
@@ -34,7 +34,7 @@ Testing Architecture & QA Standards:
 
     Mocking Local AI: Create a mock-transformers utility. Tests should not download 2GB models; instead, mock the pipeline to return static JSON transcripts and scores to verify UI state transitions.
 
-    Formula Validation: Write a dedicated unit test suite for the Strategyn Opportunity Score logic. Include edge cases: I=1,S=10 (Score should be 1) and I=10,S=1 (Score should be 19).
+    Formula Validation: Write a dedicated unit test suite for the opportunity score logic. Include edge cases: I=1,S=10 (Score should be 1) and I=10,S=1 (Score should be 19).
 
     Worker Testing: Ensure the communication between the Main Thread and the Web Worker is tested using postMessage mocks.
 

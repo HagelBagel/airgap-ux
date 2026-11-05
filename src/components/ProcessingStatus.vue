@@ -110,7 +110,7 @@ const statusLabel = computed<string>(() => {
       />
     </div>
 
-    <!-- Export buttons and Sovereign Badge: always visible -->
+    <!-- Export buttons and Privacy Badge: always visible -->
     <div class="processing-status__right-section">
       <!-- Export buttons: only show when processing is complete and there's data -->
       <div v-if="canExport" class="processing-status__export-buttons">
@@ -130,7 +130,7 @@ const statusLabel = computed<string>(() => {
         </button>
       </div>
 
-      <!-- Sovereign Badge -->
+      <!-- Privacy Badge -->
       <div class="processing-status__badge" title="All inference runs on-device. No data leaves your machine.">
         <svg
           class="processing-status__badge-icon"
@@ -251,7 +251,7 @@ const statusLabel = computed<string>(() => {
   50%       { opacity: 0.4; transform: scale(0.75); }
 }
 
-/* ── Sovereign Badge (right side) ────────────────────────────────────────────── */
+/* ── Privacy Badge (right side) ────────────────────────────────────────────── */
 .processing-status__badge {
   display: inline-flex;
   align-items: center;

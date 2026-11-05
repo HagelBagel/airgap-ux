@@ -446,3 +446,20 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 - Put the DATABASE_URL in .env
 - Installed postgres:17 image
 - Postgres port (5432) bound to 127.0.0.1 only, so the dev database (with its committed password) isn't reachable from the local network. 
+
+## 2026-11-05 — Rename to AirGap UX, drop brand names
+
+### Files changed
+- `package.json`, `package-lock.json`: package `sovereign-jtbd` → `airgap-ux`. `index.html`: title `AirGap UX`.
+- `src/domain/strategyn/` → `src/domain/opportunity/`; imports updated in `mockData.ts`, `useResearchStore.ts`, `ai.worker.ts`.
+- Worker message `RUN_STRATEGYN_ANALYSIS` → `RUN_JTBD_ANALYSIS` (`messages.ts`, `ai.worker.ts`, `useResearchStore.ts` + spec); `runStrategynAnalysis` → `runJtbdAnalysis`.
+- Comments and UI text: dashboard title, `types.ts`, `tokens.css`, `opportunityScore.ts`, `JobCard.vue`; "Sovereign Badge" → "Privacy Badge" (`ProcessingStatus.vue`, `ResearchDashboard.vue`).
+- Local DB user/name `sovereign` → `airgap` in `compose.yaml`, `.env` and the README `psql` command.
+- `CLAUDE.md`, `.github/prompts/system.prompt.md`, `notes/project-brief.md`: "opportunity score" instead of Strategyn/ODI.
+
+### Key decisions
+- Dated history (`progress.md`, `market-research.md`) and the owner's `ux-notes.md` keep the old names.
+
+### Next steps
+- Owner runs `docker compose down -v && docker compose up -d` and `npx dbmate up` to recreate the local database under the new user.
+- `notes/epics/file-mgmt-&-storage.md` still says "ODI priority" and "Sovereign Data"; not in this task's scope.
