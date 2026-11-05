@@ -10,7 +10,8 @@
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
 - [ ] Scaffold own API with SQL migrations
-- [ ] Replace vault flow (HomeView, VaultSelector, requiresVault) with sign-in + project list
+- [x] Remove vault flow (HomeView, VaultSelector, requiresVault); `/` opens the dashboard. Code archived at tag `archive/vault-flow` (HFP-004, #22)
+- [ ] Project list backed by the API (HFP-005), then sign-in
 - [ ] Update notes/project-brief.md to the new scope
 - [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 - [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)
@@ -30,7 +31,7 @@ The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the bran
 ## Pre-existing breakages (found 2026-10-26)
 
 - [x] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (restored the pre-`a6876f9` component)
-- [ ] Fix `vue-tsc -b` errors: `window.showDirectoryPicker` untyped in `src/stores/vault.ts`; `test` key rejected in `vite.config.ts`
+- [ ] Fix `vue-tsc -b` error: `test` key rejected in `vite.config.ts` (the `showDirectoryPicker` error went away with the vault code in HFP-004)
 - [ ] Resolve `vite-plugin-pwa` peer conflict with Vite 8 (npm needs `--legacy-peer-deps`)
 
 ## ResearchWorkbench follow-ups (found 2026-10-26)
@@ -67,6 +68,8 @@ The same applies to any other change to a card's averages that doesn't come from
 - [ ] Related: `currentProject` is returned writable from the store, "so components can bind sliders" (`useResearchStore.ts:377`), but the sliders use `updateCardScore`. Make it `readonly` like the rest so every change goes through an action, which is where API saving will go
 
 ## LPM-001: Select a Vault Folder
+
+Superseded by ADR 0001. The vault flow was removed in HFP-004 (#22); the code is archived at tag `archive/vault-flow`.
 
 - [x] LPM-001: Add "Select Vault" UI action
 - [x] LPM-001: Open native directory picker on action
