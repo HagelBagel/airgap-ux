@@ -463,3 +463,20 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Owner runs `docker compose down -v && docker compose up -d` and `npx dbmate up` to recreate the local database under the new user.
 - `notes/epics/file-mgmt-&-storage.md` still says "ODI priority" and "Sovereign Data"; not in this task's scope.
+
+## 2026-11-05 — HFP-004: Remove the vault flow (#22)
+
+### Files changed
+- Removed `src/views/HomeView.vue`, `src/components/VaultSelector.vue`, `src/stores/vault.ts` and their specs.
+- `src/router/index.ts`: dropped the `requiresVault` guard and `/dashboard`; `/` renders `ResearchDashboard`.
+- `GLOSSARY.md` created (User, Project; "vault" listed under _Avoid_).
+- `notes/task-list.md`: vault removal ticked, LPM-001 marked superseded, `showDirectoryPicker` type error removed from the breakages list.
+
+### Key decisions
+- The vault code is archived at tag `archive/vault-flow` (same approach as ADR 0002) in case a local mode returns.
+- Removed rather than bypassed: ADR 0001 had already retired the vault, so a dev bypass would have kept dead code alive.
+- The app now opens in every browser; the File System Access API only worked in Chromium.
+
+### Next steps
+- After merge: close #4–#9 as not planned, linking ADR 0001 and the tag.
+- HFP-005: projects API slice (Hono + `pg` in `server/`, Vite `/api` proxy, seeded dev user, list/create/delete, project list on `/`, ADR 0005).
