@@ -40,6 +40,32 @@ The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the bran
 - [ ] Replace hard-coded colours in `ResearchWorkbench.vue` with tokens from `src/styles/tokens.css`
 - [ ] Decide whether to bring back the "Desired Outcomes / N outcomes" heading that the stub in `a6876f9` added
 
+## Analysis re-entry bug (found 2026-11-05)
+
+Calling `analyzeSegments` again before `MODELS_READY` arrives (`src/stores/useResearchStore.ts:137`) causes, without any error:
+- the first call's segments are lost, because `pendingSegments` holds one array and is overwritten
+- `LOAD_MODELS` is posted again, because `modelsReady` is still false. The worker's `onmessage` is async, so both `pipeline()` loads run at once: two copies of the model in memory, `llm` overwritten by whichever finishes last, and two `PROGRESS` streams interleaved (the progress bar can jump backwards)
+- the second `MODELS_READY` finds `pendingSegments` empty and does nothing
+- the second call's `projectName` is ignored, because `ensureProject()` keeps the existing project
+
+Mock mode hides it. It isn't reachable from the UI today (the sample button is only shown while `processingStage` is `idle`), but it will be once transcript upload exists.
+
+- [ ] Decide what a second call while analysis is in flight should do: ignore it, queue it, or cancel the first run. Decide this as part of the `AnalysisProvider` interface (ADR 0003) rather than patching the store
+- [ ] Track model loading separately from "ready" (e.g. a `loading | ready` state, or one shared load promise) so `LOAD_MODELS` is sent at most once per worker
+- [ ] Add a store test: two `analyzeSegments` calls before `MODELS_READY` → exactly one `LOAD_MODELS` posted, and a defined outcome for both sets of segments
+
+## Stale job card sliders after a merge (found 2026-11-05)
+
+`JobCard.vue:26–27` sets up its slider state once, from the prop: `localImportance = ref(Math.round(props.card.averageImportance))` (same for satisfaction). That copies the value when the card first appears. Nothing in the file uses `watch` on `props.card`, so later changes to the card don't reach the sliders.
+
+`mergeCards` (`src/stores/useResearchStore.ts:323–324`) changes the primary card's averages but keeps its `id`. `JobCardsTable.vue:65–66` keys cards by `card.id`, so Vue reuses the same `JobCard` component. The sliders and the live score (`displayScore`, `JobCard.vue:32`) keep showing the old values while the store holds the new averages. No error appears. Touching a slider then sends the stale value back through `updateCardScore` and overwrites the merged average.
+
+The same applies to any other change to a card's averages that doesn't come from its own sliders (e.g. a future reload from the API).
+
+- [ ] Keep the sliders in sync with the prop: `watch` `props.card.averageImportance` / `averageSatisfaction` and reset the local refs (keeping the debounce for the user's own dragging)
+- [ ] Add a component test: mount `JobCard`, change the card's averages from outside, and expect the sliders to show the new values
+- [ ] Related: `currentProject` is returned writable from the store, "so components can bind sliders" (`useResearchStore.ts:377`), but the sliders use `updateCardScore`. Make it `readonly` like the rest so every change goes through an action, which is where API saving will go
+
 ## LPM-001: Select a Vault Folder
 
 - [x] LPM-001: Add "Select Vault" UI action
