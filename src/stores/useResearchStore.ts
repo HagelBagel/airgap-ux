@@ -12,8 +12,8 @@ import { ref, readonly } from 'vue';
 
 import type { JobCard, ProcessingStage, ResearchProject, SpeakerSegment } from '../domain/types';
 import type { WorkerInMessage, WorkerOutMessage } from '../workers/messages';
-import { computeOpportunityScore } from '../domain/strategyn/opportunityScore';
-import { averageOutcome, hasTension } from '../domain/strategyn/variance';
+import { computeOpportunityScore } from '../domain/opportunity/opportunityScore';
+import { averageOutcome, hasTension } from '../domain/opportunity/variance';
 import { MOCK_MODE } from '../featureFlags';
 
 // Re-export so existing consumers (e.g. ResearchDashboard) can keep importing
@@ -53,7 +53,7 @@ export const useResearchStore = defineStore('research', () => {
 
   /**
    * Segments queued while models are still loading.
-   * Sent as a RUN_STRATEGYN_ANALYSIS message the moment MODELS_READY arrives.
+   * Sent as a RUN_JTBD_ANALYSIS message the moment MODELS_READY arrives.
    */
   let pendingSegments: SpeakerSegment[] | null = null;
 
@@ -99,7 +99,7 @@ export const useResearchStore = defineStore('research', () => {
           const segments = pendingSegments;
           pendingSegments = null;
           postToWorker({
-            type:    'RUN_STRATEGYN_ANALYSIS',
+            type:    'RUN_JTBD_ANALYSIS',
             payload: { segments, mockMode: MOCK_MODE },
           });
         }
@@ -148,7 +148,7 @@ export const useResearchStore = defineStore('research', () => {
 
     if (modelsReady) {
       // Models already warmed up (e.g. second transcript in a session).
-      postToWorker({ type: 'RUN_STRATEGYN_ANALYSIS', payload: { segments, mockMode: MOCK_MODE } });
+      postToWorker({ type: 'RUN_JTBD_ANALYSIS', payload: { segments, mockMode: MOCK_MODE } });
     } else {
       // Queue the segments; they are flushed when MODELS_READY fires.
       pendingSegments = segments;

@@ -16,8 +16,8 @@ export interface LoadModelsMsg {
   };
 }
 
-export interface RunStrategynAnalysisMsg {
-  type: 'RUN_STRATEGYN_ANALYSIS';
+export interface RunJtbdAnalysisMsg {
+  type: 'RUN_JTBD_ANALYSIS';
   payload: {
     /** Transcript segments to analyse. */
     segments: SpeakerSegment[];
@@ -27,7 +27,7 @@ export interface RunStrategynAnalysisMsg {
 
 export type WorkerInMessage =
   | LoadModelsMsg
-  | RunStrategynAnalysisMsg;
+  | RunJtbdAnalysisMsg;
 
 // ─── Outbound: worker → main thread ───────────────────────────────────────────
 

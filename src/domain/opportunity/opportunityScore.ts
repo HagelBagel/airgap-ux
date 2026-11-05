@@ -1,5 +1,5 @@
 /**
- * Strategyn / Outcome-Driven Innovation (ODI) scoring formula.
+ * Opportunity score formula.
  *
  * Opportunity Score = I + max(I − S, 0)
  *

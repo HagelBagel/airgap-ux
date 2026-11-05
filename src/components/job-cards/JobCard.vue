@@ -111,7 +111,7 @@ function handleCardClick(): void {
     <!-- ── Desired Outcome description ────────────────────────────────────── -->
     <p class="job-card__description">{{ card.description }}</p>
 
-    <!-- ── Strategyn sliders ──────────────────────────────────────────────── -->
+    <!-- ── Importance / satisfaction sliders ────────────────────────────────────── -->
     <div class="job-card__sliders" role="group" aria-label="Score refinement">
 
       <div class="job-card__slider-row">

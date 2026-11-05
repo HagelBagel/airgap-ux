@@ -1,13 +1,13 @@
-This summary is designed for a technical "architect" or coding assistant LLM. It outlines the core logic, tech stack, and user experience for **Sovereign JTBD**, a local-first UX research tool.
+This summary is designed for a technical "architect" or coding assistant LLM. It outlines the core logic, tech stack, and user experience for **AirGap UX**, a local-first UX research tool.
 
 ---
 
-# Project Brief: Sovereign JTBD (V1)
+# Project Brief: AirGap UX (V1)
 
 ## 1. Vision & Problem Statement
 * **The Problem:** UX consultants cannot use cloud AI (Otter, Gong) for sensitive client data due to NDAs and privacy risks. Additionally, cloud AI has a significant carbon footprint.
-* **The Solution:** A local-first, browser-based PWA that uses **WebGPU** to transcribe and analyze user research (Videos/Audio). It uses the **Strategyn (ODI)** framework to mathematically calculate "Opportunity Scores" from qualitative interviews.
-* **Unique Selling Proposition (USP):** 100% Privacy (Zero-data-transfer), Carbon-Efficient (Local processing), and Methodologically Rigorous (Strategyn Formula).
+* **The Solution:** A local-first, browser-based PWA that uses **WebGPU** to transcribe and analyze user research (Videos/Audio). It uses the **opportunity score** formula to calculate scores from qualitative interviews.
+* **Unique Selling Proposition (USP):** 100% Privacy (Zero-data-transfer), Carbon-Efficient (Local processing), and Methodologically Rigorous (opportunity score formula).
 
 ## 2. Core Technical Architecture (2026 Stack)
 * **Frontend:** Vite + Vue3 / Nuxt.js (Static Export).
@@ -19,7 +19,7 @@ This summary is designed for a technical "architect" or coding assistant LLM. It
 * **Local Storage:** `IndexedDB` for persistence of video blobs, transcripts, and JSON state.
 * **Vector Engine:** `Voy` or `Wasm-Vector-DB` for local semantic search across files.
 
-## 3. The "Strategyn" Logic Engine
+## 3. The Opportunity Score Logic Engine
 The app must extract "Desired Outcomes" and assign them two scores on a 1-10 scale based on transcript sentiment:
 1.  **Importance ($I$):** How critical is the task to the user?
 2.  **Satisfaction ($S$):** How well does their current solution work?
@@ -45,7 +45,7 @@ $$I + \max(I - S, 0) = \text{Opportunity Score}$$
 * **The Air-Gap Toggle:** A UI state that confirms the browser is offline but still processing.
 
 ## 6. Prompt for Coding Assistant
-> "I want to build a React PWA that uses Transformers.js and WebGPU to process local video files. The goal is to extract 'Jobs-to-be-Done' and score them using the Strategyn formula. Start by setting up a file-drop component that extracts audio from video using the Web Audio API and routes it to a local Whisper-base model for transcription."
+> "I want to build a React PWA that uses Transformers.js and WebGPU to process local video files. The goal is to extract 'Jobs-to-be-Done' and score them using the opportunity score formula. Start by setting up a file-drop component that extracts audio from video using the Web Audio API and routes it to a local Whisper-base model for transcription."
 
 ---
 
@@ -78,7 +78,7 @@ Prioritize **"Single-File-to-Table"** first. Once the AI can reliably turn one v
 - [ ] `src/services/storage/` (IndexedDB and persistence adapters).
 - [ ] `src/services/export/` (JSON/CSV export builders).
 - [ ] `src/domain/` (core entities and business rules).
-- [ ] `src/domain/strategyn/` (Importance, Satisfaction, Opportunity Score formula).
+- [ ] `src/domain/opportunity/` (Importance, Satisfaction, Opportunity Score formula).
 - [ ] `src/domain/transcript/` (speaker segments, evidence model).
 - [ ] `src/composables/` (reusable Composition API logic).
 - [ ] `src/styles/` (global tokens and base styles).
@@ -104,8 +104,8 @@ Prioritize **"Single-File-to-Table"** first. Once the AI can reliably turn one v
 - [ ] `src/services/storage/repositories.ts` (project, transcript, job card repositories).
 - [ ] `src/services/export/exportCsv.ts` (CSV export with required fields).
 - [ ] `src/services/export/exportJson.ts` (JSON export with required fields).
-- [ ] `src/domain/strategyn/opportunityScore.ts` (I + max(I - S, 0)).
-- [ ] `src/domain/strategyn/variance.ts` (multi-speaker variance/conflict checks).
+- [ ] `src/domain/opportunity/opportunityScore.ts` (I + max(I - S, 0)).
+- [ ] `src/domain/opportunity/variance.ts` (multi-speaker variance/conflict checks).
 - [ ] `src/domain/types.ts` (core shared interfaces).
 - [ ] `src/components/upload/FileDropzone.vue`.
 - [ ] `src/components/job-cards/JobCardsTable.vue`.
@@ -145,7 +145,7 @@ Prioritize **"Single-File-to-Table"** first. Once the AI can reliably turn one v
 - [ ] Verify WebGPU availability and add graceful fallback messaging.
 - [ ] Confirm worker build output and message channel typing.
 - [ ] Smoke test offline mode after first model cache (air-gap behavior).
-- [ ] Validate Strategyn scoring with unit tests for formula and variance rules.
+- [ ] Validate opportunity scoring with unit tests for formula and variance rules.
 - [ ] Add a sample fixture input and expected 5-row JTBD draft output for regression tests.
 
 ### 5) Bootstrap command sequence (PowerShell, in order)
@@ -163,10 +163,10 @@ npm install -D eslint prettier eslint-config-prettier eslint-plugin-vue @typescr
 npm install -D vitest @vue/test-utils jsdom playwright
 
 # 3) Create initial folders
-New-Item -ItemType Directory -Force -Path src/app,src/components,src/components/job-cards,src/components/upload,src/components/power-meter,src/components/tension-map,src/views,src/router,src/stores,src/workers,src/services,src/services/ai,src/services/storage,src/services/export,src/domain,src/domain/strategyn,src/domain/transcript,src/composables,src/styles,src/utils,public/models,tests/unit,tests/e2e | Out-Null
+New-Item -ItemType Directory -Force -Path src/app,src/components,src/components/job-cards,src/components/upload,src/components/power-meter,src/components/tension-map,src/views,src/router,src/stores,src/workers,src/services,src/services/ai,src/services/storage,src/services/export,src/domain,src/domain/opportunity,src/domain/transcript,src/composables,src/styles,src/utils,public/models,tests/unit,tests/e2e | Out-Null
 
 # 4) Create initial files (empty placeholders where implementation follows)
-New-Item -ItemType File -Force -Path src/router/index.ts,src/stores/researchProject.ts,src/stores/processing.ts,src/workers/ai.worker.ts,src/workers/messages.ts,src/services/ai/transformersRuntime.ts,src/services/ai/transcriptionPipeline.ts,src/services/ai/jtbdExtractionPipeline.ts,src/services/storage/indexedDb.ts,src/services/storage/repositories.ts,src/services/export/exportCsv.ts,src/services/export/exportJson.ts,src/domain/strategyn/opportunityScore.ts,src/domain/strategyn/variance.ts,src/domain/types.ts,src/components/upload/FileDropzone.vue,src/components/job-cards/JobCardsTable.vue,src/components/job-cards/JobCardEvidencePanel.vue,src/components/tension-map/TensionMapBadge.vue,src/components/power-meter/PowerMeter.vue,src/styles/tokens.css,src/styles/base.css,.eslintrc.cjs,.prettierrc | Out-Null
+New-Item -ItemType File -Force -Path src/router/index.ts,src/stores/researchProject.ts,src/stores/processing.ts,src/workers/ai.worker.ts,src/workers/messages.ts,src/services/ai/transformersRuntime.ts,src/services/ai/transcriptionPipeline.ts,src/services/ai/jtbdExtractionPipeline.ts,src/services/storage/indexedDb.ts,src/services/storage/repositories.ts,src/services/export/exportCsv.ts,src/services/export/exportJson.ts,src/domain/opportunity/opportunityScore.ts,src/domain/opportunity/variance.ts,src/domain/types.ts,src/components/upload/FileDropzone.vue,src/components/job-cards/JobCardsTable.vue,src/components/job-cards/JobCardEvidencePanel.vue,src/components/tension-map/TensionMapBadge.vue,src/components/power-meter/PowerMeter.vue,src/styles/tokens.css,src/styles/base.css,.eslintrc.cjs,.prettierrc | Out-Null
 
 # 5) Ensure PWA manifest file exists at app root
 if (-Not (Test-Path "public/manifest.webmanifest")) {
@@ -183,16 +183,16 @@ npm run build
 If `npm create vite@latest .` refuses to run in a non-empty folder, use:
 
 ```powershell
-npm create vite@latest sovereign-jtbd -- --template vue-ts
+npm create vite@latest airgap-ux -- --template vue-ts
 ```
 
 Then move into that folder and run steps 2-7:
 
 ```powershell
-Set-Location sovereign-jtbd
+Set-Location airgap-ux
 ```
 
-My apologies—I was over-complicating things. Here is a clear breakdown of the features and sub-tasks we’ve mapped out for your **JTBD/ODI Insight Workbench**, organized by functional area.
+My apologies—I was over-complicating things. Here is a clear breakdown of the features and sub-tasks we’ve mapped out for your **JTBD Insight Workbench**, organized by functional area.
 
 ### 1. Audio Pre-processing Pipeline
 
@@ -240,7 +240,7 @@ My apologies—I was over-complicating things. Here is a clear breakdown of the 
 
 ### 4. Strategy & Data Management
 
-* **JTBD/ODI Frameworks:**
+* **JTBD Frameworks:**
 * **Priority Index:** Calculation of "Opportunity" using renamed formulas to respect IP (Importance + Gap logic).
 * **Outcome Mapping:** Categorizing segments into Desired Outcomes or Pain Points.
 

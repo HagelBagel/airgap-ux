@@ -38,7 +38,7 @@ function reset(): void {
     <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
     <header class="dashboard__header">
       <div class="dashboard__brand">
-        <h1 class="dashboard__title">Sovereign JTBD</h1>
+        <h1 class="dashboard__title">AirGap UX</h1>
         <div class="dashboard__subtitle">Jobs-to-be-Done Research Assistant</div>
       </div>
       
@@ -72,7 +72,7 @@ function reset(): void {
     <!-- ── Main content ────────────────────────────────────────────────────── -->
     <main class="dashboard__body">
 
-      <!-- Processing status strip + Sovereign Badge -->
+      <!-- Processing status strip + Privacy Badge -->
       <ProcessingStatus
         :stage="store.processingStage"
         :load-progress="store.loadProgress"
