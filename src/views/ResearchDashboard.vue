@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useResearchStore, MOCK_MODE } from '../stores/useResearchStore'
+import { useProjectsStore } from '../stores/useProjectsStore'
 import { MOCK_SEGMENTS } from '../services/ai/mockData'
 import ResearchWorkbench from '../components/ResearchWorkbench.vue'
 import ProcessingStatus from '../components/ProcessingStatus.vue'
 import AppSettings from '../components/AppSettings.vue'
 
+const props = defineProps<{ id: string }>()
+
 const store = useResearchStore()
+const projects = useProjectsStore()
+
+// ── Open Project ─────────────────────────────────────────────────────────────
+// There is no GET /api/projects/:id yet, so the name comes from the list.
+
+const project = computed(() => projects.byId(props.id))
+
+/** The id `store.openProject` last ran for; the dashboard waits for it. */
+const openedId = ref<string | null>(null)
+const isOpen = computed(() => openedId.value === props.id && project.value !== undefined)
+
+async function openFromList(id: string, refresh = false): Promise<void> {
+  await (refresh ? projects.load() : projects.ensureLoaded())
+  const found = projects.byId(id)
+  // Ignore a lookup that finished after the route moved on to another id.
+  if (!found || id !== props.id) return
+  // Opening a different Project discards the in-memory analysis.
+  store.openProject(found)
+  openedId.value = id
+}
+
+watch(() => props.id, (id) => openFromList(id), { immediate: true })
 
 // ── Settings dialog state ────────────────────────────────────────────────────
 const isSettingsOpen = ref(false)
@@ -23,7 +49,8 @@ const hasResults = computed(() =>
 // Transcript import is not built yet (see ADR 0002); in Mock Mode the sample
 // transcript keeps the analysis UI usable in the meantime.
 function analyzeSampleTranscript(): void {
-  store.analyzeSegments(MOCK_SEGMENTS, 'Sample interview')
+  if (!project.value) return
+  store.analyzeSegments(MOCK_SEGMENTS, project.value.name)
 }
 
 function reset(): void {
@@ -38,7 +65,8 @@ function reset(): void {
     <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
     <header class="dashboard__header">
       <div class="dashboard__brand">
-        <h1 class="dashboard__title">AirGap UX</h1>
+        <RouterLink class="dashboard__back" to="/">← Projects</RouterLink>
+        <h1 class="dashboard__title">{{ isOpen ? project?.name : 'AirGap UX' }}</h1>
         <div class="dashboard__subtitle">Jobs-to-be-Done Research Assistant</div>
       </div>
       
@@ -59,18 +87,31 @@ function reset(): void {
         </button>
 
         <button
-          v-if="store.currentProject"
+          v-if="isOpen && store.currentProject"
           class="dashboard__reset-btn"
           type="button"
           @click="reset"
         >
-          ↺ New Project
+          ↺ Start over
         </button>
       </div>
     </header>
 
+    <!-- ── Project lookup states ───────────────────────────────────────────── -->
+    <main v-if="!isOpen" class="dashboard__body">
+      <div v-if="projects.status === 'error'" class="dashboard__error" role="alert">
+        <p class="dashboard__error-text">Could not load the project: {{ projects.error }}</p>
+        <button class="dashboard__error-retry" type="button" @click="openFromList(props.id, true)">Try again</button>
+      </div>
+      <div v-else-if="projects.status === 'ready' && !project" class="dashboard__lookup">
+        <p>Project not found.</p>
+        <RouterLink to="/">Back to projects</RouterLink>
+      </div>
+      <p v-else class="dashboard__lookup">Loading project…</p>
+    </main>
+
     <!-- ── Main content ────────────────────────────────────────────────────── -->
-    <main class="dashboard__body">
+    <main v-else class="dashboard__body">
 
       <!-- Processing status strip + Privacy Badge -->
       <ProcessingStatus
@@ -163,6 +204,27 @@ function reset(): void {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.dashboard__back {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-accent);
+  }
+}
+
+.dashboard__lookup {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
 }
 
 .dashboard__logo {
