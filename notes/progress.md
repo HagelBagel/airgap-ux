@@ -480,3 +480,23 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - After merge: close #4–#9 as not planned, linking ADR 0001 and the tag.
 - HFP-005: projects API slice (Hono + `pg` in `server/`, Vite `/api` proxy, seeded dev user, list/create/delete, project list on `/`, ADR 0005).
+
+## 2026-11-06 — HFP-005: Projects API slice (#24), Claude's part
+
+### Files changed
+- `server/` (new package): `src/config.ts`, `src/db/pool.ts`, `src/app.ts`, `src/index.ts`, `src/projects/{dto,routes,queries}.ts`, `src/test/testDb.ts`, specs, `scripts/seed.ts`, `tsconfig.json`, `vitest.config.ts`, `README.md`, npm scripts `dev` / `test` / `seed` / `type-check`.
+- Root: `vite.config.ts` (proxy `/api` → `127.0.0.1:3001`; Vitest excludes `server/**`), `package.json` (`db:test:prepare`), `.env` (`TEST_DATABASE_URL`, `DEV_USER_ID`), `eslint.config.js` (`fetch`, `Response` globals).
+- App: `src/services/api/projectsApi.ts`, `src/stores/useProjectsStore.ts`, `src/views/ProjectListView.vue` on `/`, `/projects/:id` → `ResearchDashboard` (`id` prop), `useResearchStore.openProject`. Specs for each.
+- `docs/adr/0005-api-hono-raw-sql-same-origin.md` (Proposed).
+
+### Key decisions
+- `createApp({ db, devUserId })` takes anything with `.query`, so API tests run on one connection inside `BEGIN … ROLLBACK` against `airgap_test`. The test helper refuses a database whose name doesn't end in `_test`.
+- Name validation in the API (trim, 1–200 code points) mirrors the CHECK. The CHECK uses plain `btrim` (spaces only), so the API is stricter for tabs/newlines; documented in `dto.ts`.
+- Malformed UUID on DELETE → 400; another owner's or unknown id → 404.
+- `openProject` resets the in-memory analysis only when the Project id changes; returning to the same Project keeps it. The dashboard waits for `openProject` before showing analysis, so the previous Project's results never flash.
+- Server keeps Vitest 5 and uses the root's `tsc`; frontend Vitest 5 upgrade noted in `task-list.md`.
+
+### Next steps
+- Owner: SQL in `server/src/projects/queries.ts`, `db/seed.sql` (user id `00000000-0000-4000-8000-000000000001`), `projects.name` CHECK migration.
+- Then: `docker compose up -d`, `npx dbmate up`, `npm run db:test:prepare`, `cd server && npm test`; tick HFP-005 in `task-list.md` when green.
+- No delete button in the UI yet (the endpoint exists; not in the issue's App criteria).
