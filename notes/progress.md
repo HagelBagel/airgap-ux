@@ -500,3 +500,7 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 - Owner: SQL in `server/src/projects/queries.ts`, `db/seed.sql` (user id `00000000-0000-4000-8000-000000000001`), `projects.name` CHECK migration.
 - Then: `docker compose up -d`, `npx dbmate up`, `npm run db:test:prepare`, `cd server && npm test`; tick HFP-005 in `task-list.md` when green.
 - No delete button in the UI yet (the endpoint exists; not in the issue's App criteria).
+
+### Follow-up: `.env` no longer tracked
+- Settings moved to a committed `.env.example`; `.env` is gitignored and removed from the index (`git rm --cached`). Fresh clones run `cp .env.example .env`. The server's Vitest config says so if `.env` is missing.
+- Caveat: pulling this commit into another existing clone deletes that clone's `.env`; recreate it from `.env.example`.

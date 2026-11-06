@@ -41,6 +41,7 @@ So I=10, S=1 scores 19 (important and badly served), while I=1, S=10 scores 1. W
 ### Install and run
 
 ```bash
+cp .env.example .env   # local settings; .env is gitignored
 npm install
 npm run dev
 ```

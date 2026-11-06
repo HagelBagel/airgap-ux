@@ -1,7 +1,12 @@
 import { defineConfig } from 'vitest/config'
 
-// The tests read TEST_DATABASE_URL from the repo's shared .env.
-process.loadEnvFile(new URL('../.env', import.meta.url))
+// The tests read TEST_DATABASE_URL from the repo's root .env
+// (copied from .env.example).
+try {
+  process.loadEnvFile(new URL('../.env', import.meta.url))
+} catch {
+  throw new Error('No .env at the repo root. Run `cp .env.example .env` there first.')
+}
 
 export default defineConfig({
   test: {

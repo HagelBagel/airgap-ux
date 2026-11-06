@@ -29,6 +29,7 @@ npm run code-quality   # type-check + lint + test (run before committing)
 
 - ESLint (`eslint.config.js`, flat config) **ignores all `.vue` files**; only `vue-tsc` checks SFCs. Browser globals must be listed explicitly in `eslint.config.js` (`no-undef` is off, but add new globals there when introducing them).
 - Tests use **jsdom** with Vitest globals (configured in `vite.config.ts`). `.github/prompts/system.prompt.md` names Vitest Browser Mode as the target, but do not switch environments without discussing it first.
+- Local settings live in `.env`, which is gitignored; `.env.example` is the committed template. Add new settings to both.
 - `VITE_MOCK_MODE=true` (in `.env`) makes the worker return canned data instantly with no model download or GPU; read via `src/featureFlags.ts` (`MOCK_MODE`). Default is real inference.
 
 ## Architecture

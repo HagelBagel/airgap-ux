@@ -2,7 +2,7 @@
 
 Hono on Node with raw SQL through `pg`. See [ADR 0005](../docs/adr/0005-api-hono-raw-sql-same-origin.md).
 
-Settings come from the repo's root `.env`: `DATABASE_URL`, `DEV_USER_ID`, `TEST_DATABASE_URL` and optionally `API_PORT` (default 3001).
+Settings come from the repo's root `.env` (copy it from `.env.example`): `DATABASE_URL`, `DEV_USER_ID`, `TEST_DATABASE_URL` and optionally `API_PORT` (default 3001).
 
 ## Run
 
