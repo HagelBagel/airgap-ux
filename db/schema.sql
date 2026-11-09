@@ -159,7 +159,8 @@ CREATE TABLE public.projects (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     owner_id uuid NOT NULL,
-    name text NOT NULL
+    name text NOT NULL,
+    CONSTRAINT projects_name_check CHECK (((char_length(btrim(name)) >= 1) AND (char_length(btrim(name)) <= 200)))
 );
 
 
@@ -717,4 +718,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102150501'),
     ('20261102160000'),
     ('20261102160100'),
-    ('20261102160200');
+    ('20261102160200'),
+    ('20261109132042');
