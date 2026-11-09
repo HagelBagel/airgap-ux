@@ -13,7 +13,8 @@
     "type-check": "vue-tsc --noEmit",
     "lint-check": "eslint src/ --max-warnings 0",
     "lint-fix": "eslint src/ --fix",
-    "unused-check": "npm run lint-check"
+    "unused-check": "npm run lint-check",
+    "db:test:prepare": "dbmate -e TEST_DATABASE_URL --no-dump-schema up"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",

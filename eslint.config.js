@@ -27,6 +27,8 @@ export default [
         self: 'readonly',
         setTimeout: 'readonly',
         clearTimeout: 'readonly',
+        fetch: 'readonly',
+        Response: 'readonly',
       },
     },
     rules: {

@@ -57,6 +57,12 @@ export const useResearchStore = defineStore('research', () => {
    */
   let pendingSegments: SpeakerSegment[] | null = null;
 
+  /**
+   * The Project from the API that the analysis belongs to. Job cards are not
+   * saved yet (HFP-005), so the analysis lives only in memory, per Project.
+   */
+  let openProjectRef: { id: string; name: string } | null = null;
+
   // ── Worker lifecycle ─────────────────────────────────────────────────────────
 
   /** Create the worker exactly once. Safe to call multiple times. */
@@ -154,6 +160,18 @@ export const useResearchStore = defineStore('research', () => {
       pendingSegments = segments;
       postToWorker({ type: 'LOAD_MODELS', payload: { mockMode: MOCK_MODE } });
     }
+  }
+
+  /**
+   * Point the analysis at a Project from the API. Switching to a different
+   * Project discards the in-memory analysis; re-opening the same Project
+   * (e.g. after visiting the project list) keeps it.
+   */
+  function openProject(project: { id: string; name: string }): void {
+    if (openProjectRef?.id !== project.id) {
+      resetProject();
+    }
+    openProjectRef = { id: project.id, name: project.name };
   }
 
   /**
@@ -337,8 +355,8 @@ export const useResearchStore = defineStore('research', () => {
   function ensureProject(name?: string): void {
     if (!currentProject.value) {
       currentProject.value = {
-        id:        crypto.randomUUID(),
-        name:      name ?? 'Untitled Project',
+        id:        openProjectRef?.id ?? crypto.randomUUID(),
+        name:      openProjectRef?.name ?? name ?? 'Untitled Project',
         createdAt: Date.now(),
         segments:  [],
         jobCards:  [],
@@ -382,6 +400,7 @@ export const useResearchStore = defineStore('research', () => {
 
     // Actions
     analyzeSegments,
+    openProject,
     resetProject,
     updateCardScore,
     mergeCards,

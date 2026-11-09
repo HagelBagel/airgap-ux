@@ -12,6 +12,23 @@
 - [ ] Scaffold own API with SQL migrations
 - [x] Remove vault flow (HomeView, VaultSelector, requiresVault); `/` opens the dashboard. Code archived at tag `archive/vault-flow` (HFP-004, #22)
 - [ ] Project list backed by the API (HFP-005), then sign-in
+  - [x] Server plumbing, app UI, tests, ADR 0005 draft (Claude, 2026-11-06)
+  - [x] Owner: write the three SQL statements in `server/src/projects/queries.ts` (list, create, delete; each scoped by `owner_id`, placeholders described in the comments)
+  - [x] Owner: write `db/seed.sql` inserting the dev User with id `00000000-0000-4000-8000-000000000001` (= `DEV_USER_ID` in `.env`), optionally a sample Project. Make it safe to run twice (e.g. `ON CONFLICT DO NOTHING`)
+  - [x] Owner: write the migration `npx dbmate new projects_name_check` adding `CHECK (char_length(btrim(name)) BETWEEN 1 AND 200)` on `projects.name`
+  - [x] Run it all, from the repo root (Docker running):
+    ```bash
+    docker compose up -d --wait     # Postgres
+    npx dbmate up                   # migrate the dev database (also updates db/schema.sql)
+    npm run db:test:prepare         # create/migrate airgap_test; re-run after each new migration
+    cd server
+    npm test                        # 29 tests; on 2026-11-06, 9 failed waiting on the steps above
+    npm run seed                    # insert the dev User
+    npm run dev                     # API on http://127.0.0.1:3001/api
+    ```
+    Then `npm run dev` at the root and open the app: create a Project, open it, go back.
+  - [x] Accept ADR 0005 (change status from Proposed), tick this item, open the PR (`Closes #24`)
+- [ ] Add a way to delete a Project in the UI (found 2026-11-09 in HFP-005). `DELETE /api/projects/:id` exists and is tested, but the project list has no delete action and `projectsApi` has no delete call. The delete cascades to transcripts, segments and excerpts, so it needs a confirmation step
 - [ ] Update notes/project-brief.md to the new scope
 - [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 - [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)
@@ -33,6 +50,7 @@ The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the bran
 - [x] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (restored the pre-`a6876f9` component)
 - [ ] Fix `vue-tsc -b` error: `test` key rejected in `vite.config.ts` (the `showDirectoryPicker` error went away with the vault code in HFP-004)
 - [ ] Resolve `vite-plugin-pwa` peer conflict with Vite 8 (npm needs `--legacy-peer-deps`)
+- [ ] Upgrade the frontend from Vitest 4 to Vitest 5 so it matches `server/` (found 2026-11-06 in HFP-005). Check `.windsurf/skills/vitest-4-reference.md` and the write-unit-test skill for anything version-specific
 
 ## ResearchWorkbench follow-ups (found 2026-10-26)
 

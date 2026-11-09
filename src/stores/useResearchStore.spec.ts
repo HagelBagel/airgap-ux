@@ -132,3 +132,47 @@ describe('useResearchStore.createManualCard', () => {
     expect(card.speakerOutcomes[0]!.evidence).toEqual(card.evidence)
   })
 })
+
+describe('useResearchStore.openProject', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    MockWorker.instances = []
+    vi.stubGlobal('Worker', MockWorker)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('names the analysis after the open Project', () => {
+    const store = useResearchStore()
+    store.openProject({ id: 'p1', name: 'Onboarding' })
+
+    store.analyzeSegments(segments, 'ignored')
+
+    expect(store.currentProject).toMatchObject({ id: 'p1', name: 'Onboarding' })
+  })
+
+  it('keeps the analysis when the same Project is opened again', () => {
+    const store = useResearchStore()
+    store.openProject({ id: 'p1', name: 'Onboarding' })
+    store.analyzeSegments(segments, 'ignored')
+
+    store.openProject({ id: 'p1', name: 'Onboarding' })
+
+    expect(store.currentProject?.segments).toEqual(segments)
+    expect(MockWorker.instances[0]!.terminate).not.toHaveBeenCalled()
+  })
+
+  it('resets the analysis when a different Project is opened', () => {
+    const store = useResearchStore()
+    store.openProject({ id: 'p1', name: 'Onboarding' })
+    store.analyzeSegments(segments, 'ignored')
+
+    store.openProject({ id: 'p2', name: 'Pilot' })
+
+    expect(store.currentProject).toBeNull()
+    expect(store.processingStage).toBe('idle')
+    expect(MockWorker.instances[0]!.terminate).toHaveBeenCalled()
+  })
+})

@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Local settings; copy .env.example to .env
+.env
 test_media
 
 # Misc
