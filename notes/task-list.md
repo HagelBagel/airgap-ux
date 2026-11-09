@@ -13,10 +13,10 @@
 - [x] Remove vault flow (HomeView, VaultSelector, requiresVault); `/` opens the dashboard. Code archived at tag `archive/vault-flow` (HFP-004, #22)
 - [ ] Project list backed by the API (HFP-005), then sign-in
   - [x] Server plumbing, app UI, tests, ADR 0005 draft (Claude, 2026-11-06)
-  - [ ] Owner: write the three SQL statements in `server/src/projects/queries.ts` (list, create, delete; each scoped by `owner_id`, placeholders described in the comments)
-  - [ ] Owner: write `db/seed.sql` inserting the dev User with id `00000000-0000-4000-8000-000000000001` (= `DEV_USER_ID` in `.env`), optionally a sample Project. Make it safe to run twice (e.g. `ON CONFLICT DO NOTHING`)
-  - [ ] Owner: write the migration `npx dbmate new projects_name_check` adding `CHECK (char_length(btrim(name)) BETWEEN 1 AND 200)` on `projects.name`
-  - [ ] Run it all, from the repo root (Docker running):
+  - [x] Owner: write the three SQL statements in `server/src/projects/queries.ts` (list, create, delete; each scoped by `owner_id`, placeholders described in the comments)
+  - [x] Owner: write `db/seed.sql` inserting the dev User with id `00000000-0000-4000-8000-000000000001` (= `DEV_USER_ID` in `.env`), optionally a sample Project. Make it safe to run twice (e.g. `ON CONFLICT DO NOTHING`)
+  - [x] Owner: write the migration `npx dbmate new projects_name_check` adding `CHECK (char_length(btrim(name)) BETWEEN 1 AND 200)` on `projects.name`
+  - [x] Run it all, from the repo root (Docker running):
     ```bash
     docker compose up -d --wait     # Postgres
     npx dbmate up                   # migrate the dev database (also updates db/schema.sql)
@@ -27,7 +27,8 @@
     npm run dev                     # API on http://127.0.0.1:3001/api
     ```
     Then `npm run dev` at the root and open the app: create a Project, open it, go back.
-  - [ ] Accept ADR 0005 (change status from Proposed), tick this item, open the PR (`Closes #24`)
+  - [x] Accept ADR 0005 (change status from Proposed), tick this item, open the PR (`Closes #24`)
+- [ ] Add a way to delete a Project in the UI (found 2026-11-09 in HFP-005). `DELETE /api/projects/:id` exists and is tested, but the project list has no delete action and `projectsApi` has no delete call. The delete cascades to transcripts, segments and excerpts, so it needs a confirmation step
 - [ ] Update notes/project-brief.md to the new scope
 - [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 - [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)

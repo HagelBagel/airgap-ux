@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (2026-11-06). First used by HFP-005 (#24), the projects slice.
+Accepted (2026-11-09). First used by HFP-005 (#24), the projects slice.
 
 ## Context
 

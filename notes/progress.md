@@ -504,3 +504,23 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Follow-up: `.env` no longer tracked
 - Settings moved to a committed `.env.example`; `.env` is gitignored and removed from the index (`git rm --cached`). Fresh clones run `cp .env.example .env`. The server's Vitest config says so if `.env` is missing.
 - Caveat: pulling this commit into another existing clone deletes that clone's `.env`; recreate it from `.env.example`.
+
+## 2026-11-09 — HFP-005: Projects API slice (#24), owner's part
+
+### Files changed
+- `server/src/projects/queries.ts`: the list, create and delete SQL (written by the owner).
+- `db/migrations/20261109132042_projects_name_check.sql` and `db/schema.sql`: CHECK on `projects.name` (written by the owner).
+- `db/seed.sql`: dev User and one sample Project (written by the owner).
+- `docs/adr/0005-api-hono-raw-sql-same-origin.md`: status Accepted.
+- `notes/task-list.md`: HFP-005 items ticked; UI delete added as follow-up.
+
+### Key decisions
+- The project list sorts by `created_at DESC, id`: newest first, with `id` as a tie-break so rows created in one transaction keep a stable order.
+- The seed uses `ON CONFLICT DO NOTHING` without a conflict target, so it is safe to re-run whichever unique column (`id` or `email`) conflicts. The sample Project has a fixed id so a re-run can't duplicate it.
+
+### Verification
+- Root `npm run code-quality`: 61 tests pass, plus type-check and lint. `server/`: type-check passes, 29 tests pass against `airgap_test`.
+
+### Next steps
+- Add a way to delete a Project in the UI (in `notes/task-list.md`), on its own branch.
+- From the next slice (transcript upload) the owner writes the API plumbing too.
