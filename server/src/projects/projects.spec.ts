@@ -109,12 +109,15 @@ describe('DELETE /api/projects/:id', () => {
     )
     const transcriptId = transcript.rows[0]!.id
     const segment = await db().query<{ id: string }>(
-      `INSERT INTO segments (transcript_id, ordinal, text, start_char, end_char)
-       VALUES ($1, 0, 'Hello there', 0, 11) RETURNING id`,
-      [transcriptId],
+      `INSERT INTO segments (project_id, transcript_id, ordinal, text, start_char, end_char)
+       VALUES ($1, $2, 0, 'Hello there', 0, 11) RETURNING id`,
+      [projectId, transcriptId],
     )
     const segmentId = segment.rows[0]!.id
-    await db().query('INSERT INTO excerpts (segment_id, start_offset, end_offset) VALUES ($1, 0, 5)', [segmentId])
+    await db().query(
+      'INSERT INTO excerpts (project_id, segment_id, start_offset, end_offset) VALUES ($1, $2, 0, 5)',
+      [projectId, segmentId],
+    )
 
     const res = await app.request(`/api/projects/${projectId}`, { method: 'DELETE' })
 

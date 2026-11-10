@@ -54,7 +54,8 @@ SET default_table_access_method = heap;
 CREATE TABLE public.excerpt_tags (
     excerpt_id uuid NOT NULL,
     tag_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL
 );
 
 
@@ -69,6 +70,7 @@ CREATE TABLE public.excerpts (
     segment_id uuid NOT NULL,
     start_offset integer NOT NULL,
     end_offset integer NOT NULL,
+    project_id uuid NOT NULL,
     CONSTRAINT excerpts_check CHECK (((start_offset >= 0) AND (end_offset > start_offset)))
 );
 
@@ -80,7 +82,8 @@ CREATE TABLE public.excerpts (
 CREATE TABLE public.insight_excerpts (
     insight_id uuid NOT NULL,
     excerpt_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL
 );
 
 
@@ -129,6 +132,7 @@ CREATE TABLE public.outcome_ratings (
     participant_id uuid NOT NULL,
     importance smallint NOT NULL,
     satisfaction smallint NOT NULL,
+    project_id uuid NOT NULL,
     CONSTRAINT outcome_ratings_importance_check CHECK (((importance >= 1) AND (importance <= 10))),
     CONSTRAINT outcome_ratings_satisfaction_check CHECK (((satisfaction >= 1) AND (satisfaction <= 10)))
 );
@@ -171,7 +175,8 @@ CREATE TABLE public.projects (
 CREATE TABLE public.rating_excerpts (
     rating_id uuid NOT NULL,
     excerpt_id uuid NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    project_id uuid NOT NULL
 );
 
 
@@ -201,6 +206,7 @@ CREATE TABLE public.segments (
     end_char integer NOT NULL,
     start_time interval,
     end_time interval,
+    project_id uuid NOT NULL,
     CONSTRAINT segments_check CHECK (((start_char >= 0) AND (end_char > start_char))),
     CONSTRAINT segments_check1 CHECK (((start_time >= '00:00:00'::interval) AND (end_time >= start_time))),
     CONSTRAINT segments_check2 CHECK (((start_time IS NULL) = (end_time IS NULL))),
@@ -265,6 +271,14 @@ ALTER TABLE ONLY public.excerpt_tags
 
 
 --
+-- Name: excerpts excerpts_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.excerpts
+    ADD CONSTRAINT excerpts_id_project_id_key UNIQUE (id, project_id);
+
+
+--
 -- Name: excerpts excerpts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -289,6 +303,14 @@ ALTER TABLE ONLY public.insight_excerpts
 
 
 --
+-- Name: insights insights_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insights
+    ADD CONSTRAINT insights_id_project_id_key UNIQUE (id, project_id);
+
+
+--
 -- Name: insights insights_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -297,11 +319,27 @@ ALTER TABLE ONLY public.insights
 
 
 --
+-- Name: job_cards job_cards_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.job_cards
+    ADD CONSTRAINT job_cards_id_project_id_key UNIQUE (id, project_id);
+
+
+--
 -- Name: job_cards job_cards_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.job_cards
     ADD CONSTRAINT job_cards_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: outcome_ratings outcome_ratings_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.outcome_ratings
+    ADD CONSTRAINT outcome_ratings_id_project_id_key UNIQUE (id, project_id);
 
 
 --
@@ -318,6 +356,14 @@ ALTER TABLE ONLY public.outcome_ratings
 
 ALTER TABLE ONLY public.outcome_ratings
     ADD CONSTRAINT outcome_ratings_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: participants participants_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.participants
+    ADD CONSTRAINT participants_id_project_id_key UNIQUE (id, project_id);
 
 
 --
@@ -361,6 +407,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: segments segments_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_id_project_id_key UNIQUE (id, project_id);
+
+
+--
 -- Name: segments segments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -377,6 +431,14 @@ ALTER TABLE ONLY public.segments
 
 
 --
+-- Name: tags tags_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tags
+    ADD CONSTRAINT tags_id_project_id_key UNIQUE (id, project_id);
+
+
+--
 -- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -390,6 +452,14 @@ ALTER TABLE ONLY public.tags
 
 ALTER TABLE ONLY public.tags
     ADD CONSTRAINT tags_project_id_name_key UNIQUE (project_id, name);
+
+
+--
+-- Name: transcripts transcripts_id_project_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transcripts
+    ADD CONSTRAINT transcripts_id_project_id_key UNIQUE (id, project_id);
 
 
 --
@@ -550,43 +620,43 @@ CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON public.users FOR EACH ROW E
 
 
 --
--- Name: excerpt_tags excerpt_tags_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: excerpt_tags excerpt_tags_excerpt_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.excerpt_tags
-    ADD CONSTRAINT excerpt_tags_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
+    ADD CONSTRAINT excerpt_tags_excerpt_id_project_id_fkey FOREIGN KEY (excerpt_id, project_id) REFERENCES public.excerpts(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: excerpt_tags excerpt_tags_tag_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: excerpt_tags excerpt_tags_tag_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.excerpt_tags
-    ADD CONSTRAINT excerpt_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE;
+    ADD CONSTRAINT excerpt_tags_tag_id_project_id_fkey FOREIGN KEY (tag_id, project_id) REFERENCES public.tags(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: excerpts excerpts_segment_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: excerpts excerpts_segment_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.excerpts
-    ADD CONSTRAINT excerpts_segment_id_fkey FOREIGN KEY (segment_id) REFERENCES public.segments(id) ON DELETE CASCADE;
+    ADD CONSTRAINT excerpts_segment_id_project_id_fkey FOREIGN KEY (segment_id, project_id) REFERENCES public.segments(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: insight_excerpts insight_excerpts_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.insight_excerpts
-    ADD CONSTRAINT insight_excerpts_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
-
-
---
--- Name: insight_excerpts insight_excerpts_insight_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: insight_excerpts insight_excerpts_excerpt_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.insight_excerpts
-    ADD CONSTRAINT insight_excerpts_insight_id_fkey FOREIGN KEY (insight_id) REFERENCES public.insights(id) ON DELETE CASCADE;
+    ADD CONSTRAINT insight_excerpts_excerpt_id_project_id_fkey FOREIGN KEY (excerpt_id, project_id) REFERENCES public.excerpts(id, project_id) ON DELETE CASCADE;
+
+
+--
+-- Name: insight_excerpts insight_excerpts_insight_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.insight_excerpts
+    ADD CONSTRAINT insight_excerpts_insight_id_project_id_fkey FOREIGN KEY (insight_id, project_id) REFERENCES public.insights(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -606,19 +676,19 @@ ALTER TABLE ONLY public.job_cards
 
 
 --
--- Name: outcome_ratings outcome_ratings_job_card_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: outcome_ratings outcome_ratings_job_card_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.outcome_ratings
-    ADD CONSTRAINT outcome_ratings_job_card_id_fkey FOREIGN KEY (job_card_id) REFERENCES public.job_cards(id) ON DELETE CASCADE;
+    ADD CONSTRAINT outcome_ratings_job_card_id_project_id_fkey FOREIGN KEY (job_card_id, project_id) REFERENCES public.job_cards(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: outcome_ratings outcome_ratings_participant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: outcome_ratings outcome_ratings_participant_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.outcome_ratings
-    ADD CONSTRAINT outcome_ratings_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES public.participants(id) ON DELETE CASCADE;
+    ADD CONSTRAINT outcome_ratings_participant_id_project_id_fkey FOREIGN KEY (participant_id, project_id) REFERENCES public.participants(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -638,35 +708,35 @@ ALTER TABLE ONLY public.projects
 
 
 --
--- Name: rating_excerpts rating_excerpts_excerpt_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: rating_excerpts rating_excerpts_excerpt_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.rating_excerpts
-    ADD CONSTRAINT rating_excerpts_excerpt_id_fkey FOREIGN KEY (excerpt_id) REFERENCES public.excerpts(id) ON DELETE CASCADE;
+    ADD CONSTRAINT rating_excerpts_excerpt_id_project_id_fkey FOREIGN KEY (excerpt_id, project_id) REFERENCES public.excerpts(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: rating_excerpts rating_excerpts_rating_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: rating_excerpts rating_excerpts_rating_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.rating_excerpts
-    ADD CONSTRAINT rating_excerpts_rating_id_fkey FOREIGN KEY (rating_id) REFERENCES public.outcome_ratings(id) ON DELETE CASCADE;
+    ADD CONSTRAINT rating_excerpts_rating_id_project_id_fkey FOREIGN KEY (rating_id, project_id) REFERENCES public.outcome_ratings(id, project_id) ON DELETE CASCADE;
 
 
 --
--- Name: segments segments_participant_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.segments
-    ADD CONSTRAINT segments_participant_id_fkey FOREIGN KEY (participant_id) REFERENCES public.participants(id);
-
-
---
--- Name: segments segments_transcript_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: segments segments_participant_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.segments
-    ADD CONSTRAINT segments_transcript_id_fkey FOREIGN KEY (transcript_id) REFERENCES public.transcripts(id) ON DELETE CASCADE;
+    ADD CONSTRAINT segments_participant_id_project_id_fkey FOREIGN KEY (participant_id, project_id) REFERENCES public.participants(id, project_id);
+
+
+--
+-- Name: segments segments_transcript_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.segments
+    ADD CONSTRAINT segments_transcript_id_project_id_fkey FOREIGN KEY (transcript_id, project_id) REFERENCES public.transcripts(id, project_id) ON DELETE CASCADE;
 
 
 --
@@ -686,11 +756,11 @@ ALTER TABLE ONLY public.transcripts
 
 
 --
--- Name: transcripts transcripts_replaces_transcript_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: transcripts transcripts_replaces_transcript_id_project_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.transcripts
-    ADD CONSTRAINT transcripts_replaces_transcript_id_fkey FOREIGN KEY (replaces_transcript_id) REFERENCES public.transcripts(id) ON DELETE SET NULL;
+    ADD CONSTRAINT transcripts_replaces_transcript_id_project_id_fkey FOREIGN KEY (replaces_transcript_id, project_id) REFERENCES public.transcripts(id, project_id) ON DELETE SET NULL (replaces_transcript_id);
 
 
 --
@@ -719,4 +789,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102160000'),
     ('20261102160100'),
     ('20261102160200'),
-    ('20261109132042');
+    ('20261109132042'),
+    ('20261110133029');

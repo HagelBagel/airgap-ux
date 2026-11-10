@@ -29,6 +29,9 @@
     Then `npm run dev` at the root and open the app: create a Project, open it, go back.
   - [x] Accept ADR 0005 (change status from Proposed), tick this item, open the PR (`Closes #24`)
 - [ ] Add a way to delete a Project in the UI (found 2026-11-09 in HFP-005). `DELETE /api/projects/:id` exists and is tested, but the project list has no delete action and `projectsApi` has no delete call. The delete cascades to transcripts, segments and excerpts, so it needs a confirmation step
+- [x] Enforce same-project links in the schema with `project_id` on child tables and composite foreign keys (HFP-006, decided 2026-11-10, ADR 0004 consequences). Migration `20261110133029_project_scoped_foreign_keys.sql`; verified that all nine cross-project links are rejected
+- [ ] Deleting a User or Project fails once a Participant has Segments (found 2026-11-10 in HFP-006; also true before that migration). The delete cascades to `participants`, but `segments.participant_id` is `NO ACTION` and Postgres checks it before the cascade through `transcripts` has removed the segments. ADR 0004 says this case is "resolved within the same delete", which is not true today. Likely fix: make that FK `DEFERRABLE INITIALLY DEFERRED`, so it is checked at commit (a lone participant delete is still blocked). Add a test that deletes a Project with a spoken segment
+- [ ] When writes for transcripts, segments, excerpts, ratings and links are added: the API passes the Project's `project_id` on every insert (after checking the user owns that Project)
 - [ ] Update notes/project-brief.md to the new scope
 - [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 - [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)
