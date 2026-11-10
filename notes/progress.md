@@ -524,3 +524,23 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Add a way to delete a Project in the UI (in `notes/task-list.md`), on its own branch.
 - From the next slice (transcript upload) the owner writes the API plumbing too.
+
+## 2026-11-10 — HFP-006: same-project links enforced by the schema
+
+### Files changed
+- `db/migrations/20261110133029_project_scoped_foreign_keys.sql` and `db/schema.sql`: `project_id` added to `segments`, `excerpts`, `outcome_ratings`, `excerpt_tags`, `insight_excerpts` and `rating_excerpts` (backfilled from the parent, then `NOT NULL`). `UNIQUE (id, project_id)` on each parent. Every parent link is now a composite FK on `(parent_id, project_id)`, and the old single-column FKs are dropped. Owner wrote the first blocks; Claude wrote the rest.
+- `docs/adr/0004-data-model.md`: consequence recording the denormalization and the rejected API-only option.
+- `server/src/projects/projects.spec.ts`: the cascade-delete fixture passes `project_id` for its segment and excerpt.
+- `notes/task-list.md`: item ticked; delete bug and API follow-up added.
+
+### Key decisions
+- Denormalize rather than check in the API: the foreign keys enforce the rule for every writer, and the API only checks that the user owns the Project. Safe because a row never moves between Projects, and a wrong copy is rejected, not stored.
+- Delete rules kept: `CASCADE` everywhere, `segments.participant_id` stays `NO ACTION`, and `replaces_transcript_id` uses `ON DELETE SET NULL (replaces_transcript_id)` so `project_id` is not nulled.
+
+### Verification
+- A psql script tries all nine cross-project links; each is rejected with `foreign_key_violation`. Valid links and speakerless segments are accepted.
+- `dbmate rollback` + `dbmate up` run cleanly. `server/`: type-check passes, 29 tests pass.
+
+### Next steps
+- Fix: deleting a User/Project fails when a Participant has Segments (existed before this change; in `task-list.md`).
+- Local `.env` was deleted by pulling the HFP-005 commit that untracked it (see the caveat above); recreated from `.env.example`.
