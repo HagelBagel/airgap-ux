@@ -7,6 +7,7 @@ vi.mock('../services/api/projectsApi', async (importOriginal) => ({
   ...(await importOriginal<typeof projectsApi>()),
   listProjects: vi.fn(),
   createProject: vi.fn(),
+  deleteProject: vi.fn(),
 }))
 
 const onboarding = { id: 'p1', name: 'Onboarding', createdAt: '2026-11-06T09:30:00.000Z' }
@@ -17,6 +18,7 @@ describe('useProjectsStore', () => {
     setActivePinia(createPinia())
     vi.mocked(projectsApi.listProjects).mockReset()
     vi.mocked(projectsApi.createProject).mockReset()
+    vi.mocked(projectsApi.deleteProject).mockReset()
   })
 
   it('loads the projects and becomes ready', async () => {
@@ -60,5 +62,42 @@ describe('useProjectsStore', () => {
 
     expect(projectsApi.createProject).toHaveBeenCalledWith('Pilot')
     expect(store.projects).toEqual([onboarding, pilot])
+  })
+
+  describe('remove', () => {
+    async function loadedStore() {
+      vi.mocked(projectsApi.listProjects).mockResolvedValue([onboarding, pilot])
+      const store = useProjectsStore()
+      await store.load()
+      return store
+    }
+
+    it('deletes the project through the API and drops it from the list', async () => {
+      vi.mocked(projectsApi.deleteProject).mockResolvedValue(undefined)
+      const store = await loadedStore()
+
+      await store.remove('p1')
+
+      expect(projectsApi.deleteProject).toHaveBeenCalledWith('p1')
+      expect(store.projects).toEqual([pilot])
+    })
+
+    it('drops the project when the API says it is already gone (404)', async () => {
+      vi.mocked(projectsApi.deleteProject).mockRejectedValue(new projectsApi.ApiError(404, 'Project not found.'))
+      const store = await loadedStore()
+
+      await store.remove('p1')
+
+      expect(store.projects).toEqual([pilot])
+    })
+
+    it('keeps the project and rethrows any other error', async () => {
+      const failure = new projectsApi.ApiError(500, 'Internal Server Error')
+      vi.mocked(projectsApi.deleteProject).mockRejectedValue(failure)
+      const store = await loadedStore()
+
+      await expect(store.remove('p1')).rejects.toBe(failure)
+      expect(store.projects).toEqual([onboarding, pilot])
+    })
   })
 })

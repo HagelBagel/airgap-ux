@@ -30,10 +30,23 @@ export async function createProject(name: string): Promise<Project> {
   })
 }
 
+/**
+ * Deletes a Project and, through the database's cascades, everything in it.
+ * Throws an ApiError with status 404 when the Project does not exist or
+ * belongs to another User.
+ */
+export async function deleteProject(id: string): Promise<void> {
+  await request<void>(`/api/projects/${encodeURIComponent(id)}`, { method: 'DELETE' })
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, init)
   if (!res.ok) {
     throw new ApiError(res.status, await errorMessage(res))
+  }
+  // 204 No Content has no body to parse; callers of such endpoints use T = void.
+  if (res.status === 204) {
+    return undefined as T
   }
   return (await res.json()) as T
 }
