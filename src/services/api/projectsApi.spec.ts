@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, createProject, listProjects } from './projectsApi'
+import { ApiError, createProject, deleteProject, listProjects } from './projectsApi'
 
 const fetchMock = vi.fn<typeof fetch>()
 
@@ -46,5 +46,18 @@ describe('projectsApi', () => {
     fetchMock.mockResolvedValue(new Response('Bad gateway', { status: 502, statusText: 'Bad Gateway' }))
 
     await expect(listProjects()).rejects.toMatchObject({ status: 502, message: 'Request failed (502 Bad Gateway).' })
+  })
+
+  it('deletes a project with DELETE /api/projects/:id and accepts the empty 204', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
+
+    await expect(deleteProject('p1')).resolves.toBeUndefined()
+    expect(fetchMock).toHaveBeenCalledWith('/api/projects/p1', { method: 'DELETE' })
+  })
+
+  it('throws an ApiError with status 404 when the project to delete is gone', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ error: 'Project not found.' }, 404))
+
+    await expect(deleteProject('p1')).rejects.toEqual(new ApiError(404, 'Project not found.'))
   })
 })

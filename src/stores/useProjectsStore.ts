@@ -48,6 +48,22 @@ export const useProjectsStore = defineStore('projects', () => {
     return project
   }
 
+  /**
+   * Deletes a Project, then drops it from the list. Waits for the API rather
+   * than removing it first: the delete cannot be undone, so the list should
+   * not show it gone before it is. A 404 means it is already gone (another
+   * tab, say), which is the outcome the caller wanted. Other errors are
+   * rethrown for the confirmation dialog to show.
+   */
+  async function remove(id: string): Promise<void> {
+    try {
+      await projectsApi.deleteProject(id)
+    } catch (e) {
+      if (!(e instanceof projectsApi.ApiError && e.status === 404)) throw e
+    }
+    projects.value = projects.value.filter((p) => p.id !== id)
+  }
+
   function byId(id: string): Project | undefined {
     return projects.value.find((p) => p.id === id)
   }
@@ -59,6 +75,7 @@ export const useProjectsStore = defineStore('projects', () => {
     load,
     ensureLoaded,
     create,
+    remove,
     byId,
   }
 })

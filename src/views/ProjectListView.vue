@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import ConfirmDialog from '../components/ConfirmDialog.vue'
+import type { Project } from '../services/api/projectsApi'
 import { useProjectsStore } from '../stores/useProjectsStore'
 
 const NAME_MAX_LENGTH = 200
@@ -10,6 +12,12 @@ const projects = useProjectsStore()
 const newName = ref('')
 const isCreating = ref(false)
 const createError = ref<string | null>(null)
+
+/** The Project the confirmation dialog asks about; null when it is closed. */
+const pendingDelete = ref<Project | null>(null)
+const isDeleting = ref(false)
+const deleteError = ref<string | null>(null)
+const heading = ref<HTMLHeadingElement | null>(null)
 
 onMounted(() => {
   // Refresh on every visit so the list reflects changes from elsewhere.
@@ -34,6 +42,34 @@ async function createProject(): Promise<void> {
   }
 }
 
+function askToDelete(project: Project): void {
+  pendingDelete.value = project
+  deleteError.value = null
+}
+
+function cancelDelete(): void {
+  pendingDelete.value = null
+}
+
+async function confirmDelete(): Promise<void> {
+  const project = pendingDelete.value
+  if (!project) return
+  isDeleting.value = true
+  deleteError.value = null
+  try {
+    await projects.remove(project.id)
+    pendingDelete.value = null
+    // The Delete button that had focus is gone with its row; without this,
+    // focus would fall back to <body>.
+    await nextTick()
+    heading.value?.focus()
+  } catch (e) {
+    deleteError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    isDeleting.value = false
+  }
+}
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
 }
@@ -47,7 +83,7 @@ function formatDate(iso: string): string {
     </header>
 
     <main class="project-list__body">
-      <h2 class="project-list__heading">Projects</h2>
+      <h2 ref="heading" class="project-list__heading" tabindex="-1">Projects</h2>
 
       <form class="project-list__form" novalidate @submit.prevent="createProject">
         <label class="project-list__label" for="new-project-name">New project name</label>
@@ -90,9 +126,34 @@ function formatDate(iso: string): string {
             <span class="project-list__name">{{ project.name }}</span>
             <span class="project-list__date">Created {{ formatDate(project.createdAt) }}</span>
           </RouterLink>
+          <button
+            class="project-list__delete-btn"
+            type="button"
+            :aria-label="`Delete project ${project.name}`"
+            @click="askToDelete(project)"
+          >
+            Delete
+          </button>
         </li>
       </ul>
     </main>
+
+    <ConfirmDialog
+      :open="pendingDelete !== null"
+      :title="`Delete “${pendingDelete?.name ?? ''}”?`"
+      confirm-label="Delete project"
+      busy-label="Deleting…"
+      :busy="isDeleting"
+      :error="deleteError"
+      @confirm="confirmDelete"
+      @cancel="cancelDelete"
+    >
+      <p>
+        This permanently deletes the project and everything in it: transcripts, quotes, tags, insights and job
+        cards.
+      </p>
+      <p><strong>This can't be undone.</strong></p>
+    </ConfirmDialog>
   </div>
 </template>
 
@@ -138,6 +199,10 @@ function formatDate(iso: string): string {
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-text);
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .project-list__form {
@@ -230,22 +295,62 @@ function formatDate(iso: string): string {
   padding: 0;
 }
 
+/* The row is the card; the link fills it and the Delete button sits beside
+   the link (a button cannot go inside a link). */
+.project-list__item {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-fast);
+
+  &:has(.project-list__link:hover, .project-list__link:focus-visible) {
+    border-color: var(--color-accent);
+  }
+}
+
 .project-list__link {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
   color: var(--color-text);
   text-decoration: none;
-  transition: border-color var(--duration-fast);
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.project-list__delete-btn {
+  flex-shrink: 0;
+  margin-inline-end: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition:
+    background var(--duration-fast),
+    color var(--duration-fast),
+    border-color var(--duration-fast);
 
   &:hover,
   &:focus-visible {
-    border-color: var(--color-accent);
+    border-color: var(--c-red-200);
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-danger);
+    outline-offset: 1px;
   }
 }
 

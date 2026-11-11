@@ -26,6 +26,11 @@
   --c-amber-200: #fde68a;
   --c-amber-100: #fef3c7;
 
+  /* ── Red (destructive actions) ─────────────────────────────────────────── */
+  --c-red-700: #b91c1c;
+  --c-red-200: #fecaca;
+  --c-red-50:  #fef2f2;
+
   /* ── Slate (neutral) ───────────────────────────────────────────────────── */
   --c-slate-900: #0f172a;
   --c-slate-700: #334155;
@@ -46,6 +51,8 @@
   --color-text-muted: var(--c-slate-500);
   --color-accent:     var(--c-forest-700);
   --color-accent-bg:  var(--c-forest-50);
+  --color-danger:     var(--c-red-700);
+  --color-danger-bg:  var(--c-red-50);
 
   /*
    * Opportunity score heatmap defaults (low priority).

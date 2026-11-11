@@ -544,3 +544,27 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Fix: deleting a User/Project fails when a Participant has Segments (existed before this change; in `task-list.md`).
 - Local `.env` was deleted by pulling the HFP-005 commit that untracked it (see the caveat above); recreated from `.env.example`.
+
+## 2026-11-11 — HFP-007: delete a Project from the project list
+
+### Files changed
+- `src/services/api/projectsApi.ts` (+ spec): `deleteProject(id)`; `request` returns `undefined` on 204 instead of parsing an empty body.
+- `src/stores/useProjectsStore.ts` (+ spec): `remove(id)`.
+- `src/components/ConfirmDialog.vue` (+ spec): reusable modal confirmation on the native `<dialog>`.
+- `src/views/ProjectListView.vue` (+ spec): Delete button per row, confirmation dialog, focus handling.
+- `src/styles/tokens.css`: red palette and `--color-danger` / `--color-danger-bg`.
+- `src/test/stubDialog.ts`: `showModal()`/`close()` polyfill for jsdom. `eslint.config.js`: `HTMLDialogElement` global.
+- `.github/generated-issues/HFP-007.md`: issue draft.
+
+### Key decisions
+- Wait for the API before removing the row, rather than removing it first and restoring it on failure: the delete can't be undone, so the list shouldn't show it gone before it is. A 404 counts as success.
+- Native `<dialog>` with `showModal()` instead of `window.confirm` (can't be styled or explain the consequences well) or a dialog library (new dependency). The parent owns `open`; Esc is turned into a `cancel` event so the parent decides, and the dialog can't be dismissed while the request runs.
+- A plain confirmation naming the Project, not "type the name to confirm". Easy to add later if needed.
+- The Delete button sits beside the `RouterLink`, since a button inside a link is invalid HTML. The `<li>` became the card.
+- After a delete, focus moves to the "Projects" heading; otherwise it would fall back to `<body>` with the removed button.
+
+### Verification
+- Root `npm run code-quality`: 76 tests pass, plus type-check and lint. Not tried against the real API (Docker was off).
+
+### Next steps
+- Fix the Participant/Segments delete bug before transcript upload lands, or deleting a real Project will fail with a 500.

@@ -29,6 +29,7 @@ export default [
         clearTimeout: 'readonly',
         fetch: 'readonly',
         Response: 'readonly',
+        HTMLDialogElement: 'readonly',
       },
     },
     rules: {
