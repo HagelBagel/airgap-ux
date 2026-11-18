@@ -595,3 +595,4 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Start with #31 (HFP-008) or #32 (HFP-009), the first unblocked steps toward transcript upload. Or pick a standalone issue (#40–#46) for a short session.
 - Consider splitting #34 (transcript upload) into API and app issues before starting it.
+- Added later the same day: HFP-026 (#50, `ready-for-agent`), UI leftovers from the air-gapped design (subtitle, app name in the header, privacy badge, broken Settings button and its ETA-only settings window). Standalone, no blockers.

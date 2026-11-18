@@ -30,6 +30,7 @@ Blocking is set with GitHub's issue dependencies ("Blocked by" on each issue). A
 - #44 HFP-021: update the project brief
 - #45 HFP-022: create a job card from the keyboard
 - #46 HFP-023: ResearchWorkbench colour tokens and results heading
+- #50 HFP-026: clean up UI leftovers from the air-gapped design (subtitle, app name, privacy badge, Settings button)
 
 ## Decisions (no code blocked yet)
 

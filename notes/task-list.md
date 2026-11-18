@@ -1,4 +1,4 @@
-> **What to work on next:** see the roadmap issue [#30](https://github.com/HagelBagel/airgap-ux/issues/30). Every open item below has a GitHub issue (HFP-008 to HFP-025, #31–#48) with its blockers set. This file stays the running log; tick items here as well when an issue closes.
+> **What to work on next:** see the roadmap issue [#30](https://github.com/HagelBagel/airgap-ux/issues/30). Every open item below has a GitHub issue (HFP-008 to HFP-026, #31–#48 and #50) with its blockers set. This file stays the running log; tick items here as well when an issue closes.
 
 ## Hosted-first pivot (ADRs 0001-0003)
 
@@ -49,6 +49,10 @@ The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the bran
 - [x] Rename `src/domain/strategyn/` and update its imports; remove "Strategyn"/"ODI" from code, comments and UI text (`types.ts`, `ai.worker.ts`, `messages.ts`, `useResearchStore.ts` + spec, `mockData.ts`, `JobCard.vue`, `ProcessingStatus.vue`, `ResearchDashboard.vue`, `tokens.css`)
 - [x] Rename the local DB user/name `sovereign` in `compose.yaml`, `.env` (`DATABASE_URL`) and the README `psql` command. Needs `docker compose down -v`, which wipes the local database
 - [x] Update `CLAUDE.md`, `.github/prompts/system.prompt.md` and `notes/project-brief.md`; leave dated history (`progress.md`, `market-research.md`) as is
+
+## UI leftovers from the air-gapped design (found 2026-11-18)
+
+- [ ] Remove the "Jobs-to-be-Done Research Assistant" subtitle, show "AirGap UX" in a shared app header on every page, remove the "100% Private | 0g CO₂ Transferred" badge, and remove the Settings button and `AppSettings.vue` (ETA calibration keeps running with auto-calibrate on) (HFP-026, #50)
 
 ## Pre-existing breakages (found 2026-10-26)
 
