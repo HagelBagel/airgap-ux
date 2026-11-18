@@ -1,3 +1,5 @@
+> **What to work on next:** see the roadmap issue [#30](https://github.com/HagelBagel/airgap-ux/issues/30). Every open item below has a GitHub issue (HFP-008 to HFP-025, #31–#48) with its blockers set. This file stays the running log; tick items here as well when an issue closes.
+
 ## Hosted-first pivot (ADRs 0001-0003)
 
 - [x] Record decisions as ADRs 0001-0003 and update CLAUDE.md
