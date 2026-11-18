@@ -580,3 +580,18 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Checked and still open
 - Participant/Segments delete bug (no `DEFERRABLE` FK yet), `AnalysisProvider`, `FileDropzone` rework, `Evidence` segment ID + offsets, `v-html` in `ResearchWorkbench`, `JobCard` slider sync and writable `currentProject`, analysis re-entry, Vitest 5 upgrade on the frontend (still `^4.1.5`), `vite-plugin-pwa` peer conflict, project brief (still describes the local-first V1).
 - HFP-004's "close #4–#9" step is done: #5–#9 are closed as not planned, and #4 as completed. HFP-007 was merged in PR #29.
+
+## 2026-11-18 — Roadmap and issues for the open tasks
+
+### Files changed
+- `.github/generated-issues/HFP-008.md` to `HFP-025.md`: one draft per open task-list item, each with a "Blocked by" section and a suggested triage label. `HFP-roadmap.md`: the overview.
+- GitHub: roadmap #30, with HFP-008 to HFP-025 as sub-issues #31–#48. Native blocked-by links: #34 ← #31, #32, #33; #36 ← #35; #37 ← #34, #35; #38 ← #37; #39 ← #34, #37.
+- `notes/task-list.md`: pointer to the roadmap issue at the top.
+
+### Key decisions
+- Grouped related items: the three re-entry tasks became HFP-013; `project_id` on every insert is folded into transcript upload (HFP-011); `currentProject` readonly is folded into the slider fix (HFP-017).
+- Labels: migrations, the owner's SQL and API plumbing, and decisions are `ready-for-human`; the rest are `ready-for-agent`; re-anchoring excerpts (HFP-016) is `needs-triage`.
+
+### Next steps
+- Start with #31 (HFP-008) or #32 (HFP-009), the first unblocked steps toward transcript upload. Or pick a standalone issue (#40–#46) for a short session.
+- Consider splitting #34 (transcript upload) into API and app issues before starting it.
