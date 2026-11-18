@@ -9,7 +9,7 @@
 - [ ] Rework `FileDropzone` (still audio/video only, currently unused) for transcript upload and wire it into the dashboard
 - [ ] Introduce `AnalysisProvider` interface around the in-browser worker (ADR 0003)
 - [ ] Choose EU host for API + Postgres
-- [ ] Scaffold own API with SQL migrations
+- [x] Scaffold own API with SQL migrations (dbmate migrations in HFP-003; `server/` with Hono + `pg` in HFP-005, ADR 0005)
 - [x] Remove vault flow (HomeView, VaultSelector, requiresVault); `/` opens the dashboard. Code archived at tag `archive/vault-flow` (HFP-004, #22)
 - [ ] Project list backed by the API (HFP-005), then sign-in
   - [x] Server plumbing, app UI, tests, ADR 0005 draft (Claude, 2026-11-06)
@@ -33,7 +33,7 @@
 - [ ] Deleting a User or Project fails once a Participant has Segments (found 2026-11-10 in HFP-006; also true before that migration). The delete cascades to `participants`, but `segments.participant_id` is `NO ACTION` and Postgres checks it before the cascade through `transcripts` has removed the segments. ADR 0004 says this case is "resolved within the same delete", which is not true today. Likely fix: make that FK `DEFERRABLE INITIALLY DEFERRED`, so it is checked at commit (a lone participant delete is still blocked). Add a test that deletes a Project with a spoken segment
 - [ ] When writes for transcripts, segments, excerpts, ratings and links are added: the API passes the Project's `project_id` on every insert (after checking the user owns that Project)
 - [ ] Update notes/project-brief.md to the new scope
-- [ ] Create root `GLOSSARY.md` (referenced by CLAUDE.md and `docs/agents/domain.md`, but missing): project, transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
+- [ ] Fill in root `GLOSSARY.md`. Created in HFP-004 with User and Project only; still missing: transcript, segment, speaker, tag, insight, evidence, job card, desired outcome, opportunity score, tension
 - [ ] Add segment ID + offsets to the domain `Evidence` type; worker returns them instead of word-overlap matching (ADR 0004)
 - [ ] Rework `mergeCards` to ADR 0004's merge rule (primary card's rating per participant wins) and compute averages from ratings, not from card averages
 - [ ] Later: move excerpts from an old transcript version to a new one (re-anchor by exact text, flag misses for review)
@@ -51,7 +51,7 @@ The app is called **AirGap UX**, not "Sovereign JTBD", and must not use the bran
 ## Pre-existing breakages (found 2026-10-26)
 
 - [x] Fix `ResearchWorkbench.vue` import of `./JobCardsTable.vue` (restored the pre-`a6876f9` component)
-- [ ] Fix `vue-tsc -b` error: `test` key rejected in `vite.config.ts` (the `showDirectoryPicker` error went away with the vault code in HFP-004)
+- [x] Fix `vue-tsc -b` error: `test` key rejected in `vite.config.ts` (the `showDirectoryPicker` error went away with the vault code in HFP-004). Checked 2026-11-18: `npx vue-tsc -b` exits 0
 - [ ] Resolve `vite-plugin-pwa` peer conflict with Vite 8 (npm needs `--legacy-peer-deps`)
 - [ ] Upgrade the frontend from Vitest 4 to Vitest 5 so it matches `server/` (found 2026-11-06 in HFP-005). Check `.windsurf/skills/vitest-4-reference.md` and the write-unit-test skill for anything version-specific
 

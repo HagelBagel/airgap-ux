@@ -499,7 +499,7 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Owner: SQL in `server/src/projects/queries.ts`, `db/seed.sql` (user id `00000000-0000-4000-8000-000000000001`), `projects.name` CHECK migration.
 - Then: `docker compose up -d`, `npx dbmate up`, `npm run db:test:prepare`, `cd server && npm test`; tick HFP-005 in `task-list.md` when green.
-- No delete button in the UI yet (the endpoint exists; not in the issue's App criteria).
+- ~~No delete button in the UI yet (the endpoint exists; not in the issue's App criteria).~~ Done in HFP-007 (2026-11-11, PR #29).
 
 ### Follow-up: `.env` no longer tracked
 - Settings moved to a committed `.env.example`; `.env` is gitignored and removed from the index (`git rm --cached`). Fresh clones run `cp .env.example .env`. The server's Vitest config says so if `.env` is missing.
@@ -522,7 +522,7 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 - Root `npm run code-quality`: 61 tests pass, plus type-check and lint. `server/`: type-check passes, 29 tests pass against `airgap_test`.
 
 ### Next steps
-- Add a way to delete a Project in the UI (in `notes/task-list.md`), on its own branch.
+- ~~Add a way to delete a Project in the UI (in `notes/task-list.md`), on its own branch.~~ Done in HFP-007 (2026-11-11, PR #29).
 - From the next slice (transcript upload) the owner writes the API plumbing too.
 
 ## 2026-11-10 — HFP-006: same-project links enforced by the schema
@@ -568,3 +568,15 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 
 ### Next steps
 - Fix the Participant/Segments delete bug before transcript upload lands, or deleting a real Project will fail with a 500.
+
+## 2026-11-18 — Task list review
+
+### Files changed
+- `notes/task-list.md`: compared with this file and the code.
+  - Ticked "Scaffold own API with SQL migrations". The work was done in HFP-003 (dbmate migrations) and HFP-005 (`server/`), but the item was never ticked.
+  - Ticked the `vue-tsc -b` breakage: `npx vue-tsc -b` now exits 0.
+  - Reworded the GLOSSARY item: the file exists since HFP-004, but only defines User and Project.
+
+### Checked and still open
+- Participant/Segments delete bug (no `DEFERRABLE` FK yet), `AnalysisProvider`, `FileDropzone` rework, `Evidence` segment ID + offsets, `v-html` in `ResearchWorkbench`, `JobCard` slider sync and writable `currentProject`, analysis re-entry, Vitest 5 upgrade on the frontend (still `^4.1.5`), `vite-plugin-pwa` peer conflict, project brief (still describes the local-first V1).
+- HFP-004's "close #4–#9" step is done: #5–#9 are closed as not planned, and #4 as completed. HFP-007 was merged in PR #29.
