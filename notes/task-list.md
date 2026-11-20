@@ -40,6 +40,8 @@
 - [ ] Rework `mergeCards` to ADR 0004's merge rule (primary card's rating per participant wins) and compute averages from ratings, not from card averages
 - [ ] Later: move excerpts from an old transcript version to a new one (re-anchor by exact text, flag misses for review)
 - [ ] Block 2: decide whether to remove participant names from `raw_text` / segment text on upload (ADR 0004 consequence)
+- [x] Clean up UI left over from the air-gapped design: subtitle, privacy badge, Settings button and `AppSettings.vue`; shared `AppHeader` with one `<h1>` per page (HFP-026, #50)
+- [ ] Maybe later: a "where is this project stored" indicator (local or hosted) once local storage returns. The old "100% Private" badge was removed in HFP-026 because it no longer matched the hosted design
 
 ## Rename to AirGap UX, drop brand names (found 2026-10-31)
 

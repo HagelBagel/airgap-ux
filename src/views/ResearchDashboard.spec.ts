@@ -27,7 +27,7 @@ async function mountAt(path: string) {
     global: {
       plugins: [router],
       // The analysis UI is covered by its own specs; here only the Project wiring matters.
-      stubs: { ProcessingStatus: true, ResearchWorkbench: true, AppSettings: true },
+      stubs: { ProcessingStatus: true, ResearchWorkbench: true },
     },
   })
   await flushPromises()
@@ -49,6 +49,27 @@ describe('ResearchDashboard', () => {
 
     expect(wrapper.find('.dashboard__title').text()).toBe('Onboarding')
     expect(openProject).toHaveBeenCalledWith(onboarding)
+  })
+
+  it('shows the app name in the header and the Project name as the only <h1>', async () => {
+    const { wrapper } = await mountAt('/projects/p1')
+
+    const brand = wrapper.find('.app-header__brand')
+    expect(brand.text()).toBe('AirGap UX')
+    expect(brand.attributes('href')).toBe('/')
+    const headings = wrapper.findAll('h1')
+    expect(headings).toHaveLength(1)
+    expect(headings[0].text()).toBe('Onboarding')
+  })
+
+  it('keeps the app name in the header while the Project is loading', async () => {
+    vi.mocked(projectsApi.listProjects).mockReturnValue(new Promise(() => {}))
+
+    const { wrapper } = await mountAt('/projects/p1')
+
+    expect(wrapper.find('.app-header__brand').text()).toBe('AirGap UX')
+    expect(wrapper.findAll('h1')).toHaveLength(1)
+    expect(wrapper.text()).toContain('Loading project…')
   })
 
   it('opens the new Project when the route switches to another id', async () => {

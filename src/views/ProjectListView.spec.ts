@@ -41,6 +41,18 @@ describe('ProjectListView', () => {
     document.body.innerHTML = ''
   })
 
+  it('shows the app name in the header and "Projects" as the only <h1>', async () => {
+    vi.mocked(projectsApi.listProjects).mockResolvedValue([])
+    const wrapper = await mountView()
+
+    const brand = wrapper.find('.app-header__brand')
+    expect(brand.text()).toBe('AirGap UX')
+    expect(brand.attributes('href')).toBe('/')
+    const headings = wrapper.findAll('h1')
+    expect(headings).toHaveLength(1)
+    expect(headings[0].text()).toBe('Projects')
+  })
+
   it('shows an empty state when there are no projects', async () => {
     vi.mocked(projectsApi.listProjects).mockResolvedValue([])
     const wrapper = await mountView()

@@ -110,7 +110,7 @@ const statusLabel = computed<string>(() => {
       />
     </div>
 
-    <!-- Export buttons and Privacy Badge: always visible -->
+    <!-- Export buttons -->
     <div class="processing-status__right-section">
       <!-- Export buttons: only show when processing is complete and there's data -->
       <div v-if="canExport" class="processing-status__export-buttons">
@@ -130,23 +130,6 @@ const statusLabel = computed<string>(() => {
         </button>
       </div>
 
-      <!-- Privacy Badge -->
-      <div class="processing-status__badge" title="All inference runs on-device. No data leaves your machine.">
-        <svg
-          class="processing-status__badge-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M9.661 2.237a.531.531 0 01.678 0 11.5 11.5 0 008.15 2.872.5.5 0 01.515.52 13 13 0 01-8.56 11.76.5.5 0 01-.366 0A13 13 0 011.503 5.63a.5.5 0 01.515-.52 11.5 11.5 0 008.143-2.873zM6.22 8.72a.75.75 0 011.06 0l1.72 1.72 3.22-3.22a.75.75 0 111.06 1.06l-3.75 3.75a.75.75 0 01-1.06 0l-2.25-2.25a.75.75 0 010-1.06z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <span class="processing-status__badge-text">100% Private&nbsp;|&nbsp;0g CO₂ Transferred</span>
-      </div>
     </div>
 
   </div>
@@ -251,30 +234,7 @@ const statusLabel = computed<string>(() => {
   50%       { opacity: 0.4; transform: scale(0.75); }
 }
 
-/* ── Privacy Badge (right side) ────────────────────────────────────────────── */
-.processing-status__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  background: var(--c-forest-50);
-  color: var(--c-forest-700);
-  border: 1px solid var(--c-forest-200);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.processing-status__badge-icon {
-  width: 13px;
-  height: 13px;
-  flex-shrink: 0;
-}
-
-/* ── Right Section (Export buttons + Badge) ───────────────────────────────── */
+/* ── Right Section (Export buttons) ──────────────────────────────────────── */
 .processing-status__right-section {
   display: flex;
   align-items: center;
