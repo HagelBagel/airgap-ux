@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import AppHeader from '../components/AppHeader.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import type { Project } from '../services/api/projectsApi'
 import { useProjectsStore } from '../stores/useProjectsStore'
@@ -77,13 +78,10 @@ function formatDate(iso: string): string {
 
 <template>
   <div class="project-list">
-    <header class="project-list__header">
-      <h1 class="project-list__title">AirGap UX</h1>
-      <div class="project-list__subtitle">Jobs-to-be-Done Research Assistant</div>
-    </header>
+    <AppHeader />
 
     <main class="project-list__body">
-      <h2 ref="heading" class="project-list__heading" tabindex="-1">Projects</h2>
+      <h1 ref="heading" class="project-list__heading" tabindex="-1">Projects</h1>
 
       <form class="project-list__form" novalidate @submit.prevent="createProject">
         <label class="project-list__label" for="new-project-name">New project name</label>
@@ -162,27 +160,6 @@ function formatDate(iso: string): string {
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto 1fr;
-}
-
-.project-list__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-6);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.project-list__title {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--color-text);
-}
-
-.project-list__subtitle {
-  color: var(--color-text-muted);
-  font-size: var(--text-sm);
 }
 
 .project-list__body {

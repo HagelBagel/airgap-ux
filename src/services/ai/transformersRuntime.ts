@@ -12,7 +12,7 @@
 import { env } from '@huggingface/transformers';
 
 /**
- * Apply recommended environment settings for an air-gapped PWA:
+ * Apply environment settings for in-browser inference (ADR 0003):
  *  - Models are fetched from the Hugging Face Hub on first use.
  *  - Weights are cached in the browser's Cache API for offline access.
  *  - Local model files (from public/models/) are allowed as an override.

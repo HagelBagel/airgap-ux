@@ -595,3 +595,21 @@ CSS correctly code-split: `ResearchDashboard-*.css` (11.5 kB) emitted separately
 ### Next steps
 - Start with #31 (HFP-008) or #32 (HFP-009), the first unblocked steps toward transcript upload. Or pick a standalone issue (#40–#46) for a short session.
 - Consider splitting #34 (transcript upload) into API and app issues before starting it.
+
+## 2026-11-20 — HFP-026: clean up UI left over from the air-gapped design (#50)
+
+### Files changed
+- `src/components/AppHeader.vue` (new): the shared header. "AirGap UX" is a link to `/`, not a heading; a default slot holds page actions.
+- `src/views/ProjectListView.vue`: uses `AppHeader`. "Projects" is now the page's only `<h1>` (it was an `<h2>` under an `<h1>` AirGap UX); post-delete focus still targets it. Subtitle removed.
+- `src/views/ResearchDashboard.vue`: uses `AppHeader`, with "Start over" in its slot. The back link and the `<h1>` (Project name, or "Project" while loading) moved into the page body, so all lookup states share one `<main>` and one `<h1>`. Removed the subtitle, the Settings button, and dead styles for the settings button, the old ETA controls and `__controls`.
+- `src/components/AppSettings.vue`: deleted. `useEtaCalibration` is untouched; auto-calibrate still defaults to on.
+- `src/components/ProcessingStatus.vue`: removed the "100% Private | 0g CO₂ Transferred" badge with its icon and styles.
+- `src/services/ai/transformersRuntime.ts`: reworded the "air-gapped PWA" comment.
+- Specs: header tests in `ProjectListView.spec.ts` and `ResearchDashboard.spec.ts` (app name links to `/`, one `<h1>` each, header present while loading); dropped the `AppSettings` stub.
+
+### Key decisions
+- The header is a component with a slot rather than a layout route in `App.vue`, so each page still decides its own actions. Moving it to `App.vue` would also work, but then page actions such as "Start over" would need a teleport or a store.
+
+### Next steps
+- A browser that saved `autoCalibrate: false` earlier keeps it, and there is no longer any UI to turn it back on. Only matters on dev machines that unticked the box.
+- `ResearchDashboard.vue` still has unused styles (`__logo`, `__mock-badge`, `__mock-dot`) that predate this issue.

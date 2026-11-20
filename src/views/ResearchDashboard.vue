@@ -6,7 +6,7 @@ import { useProjectsStore } from '../stores/useProjectsStore'
 import { MOCK_SEGMENTS } from '../services/ai/mockData'
 import ResearchWorkbench from '../components/ResearchWorkbench.vue'
 import ProcessingStatus from '../components/ProcessingStatus.vue'
-import AppSettings from '../components/AppSettings.vue'
+import AppHeader from '../components/AppHeader.vue'
 
 const props = defineProps<{ id: string }>()
 
@@ -34,9 +34,6 @@ async function openFromList(id: string, refresh = false): Promise<void> {
 
 watch(() => props.id, (id) => openFromList(id), { immediate: true })
 
-// ── Settings dialog state ────────────────────────────────────────────────────
-const isSettingsOpen = ref(false)
-
 // ── Derived UI state ──────────────────────────────────────────────────────────
 
 const isIdle     = computed(() => store.processingStage === 'idle')
@@ -62,120 +59,101 @@ function reset(): void {
 <template>
   <div class="dashboard">
 
-    <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
-    <header class="dashboard__header">
-      <div class="dashboard__brand">
-        <RouterLink class="dashboard__back" to="/">← Projects</RouterLink>
-        <h1 class="dashboard__title">{{ isOpen ? project?.name : 'AirGap UX' }}</h1>
-        <div class="dashboard__subtitle">Jobs-to-be-Done Research Assistant</div>
-      </div>
-      
-      <div class="dashboard__controls">
-        
-      </div>
-      
-      <div class="dashboard__actions">
-        <button
-          class="dashboard__btn"
-          @click="isSettingsOpen = true"
-        >
-          <svg class="dashboard__btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24"></path>
-          </svg>
-          Settings
-        </button>
-
-        <button
-          v-if="isOpen && store.currentProject"
-          class="dashboard__reset-btn"
-          type="button"
-          @click="reset"
-        >
-          ↺ Start over
-        </button>
-      </div>
-    </header>
-
-    <!-- ── Project lookup states ───────────────────────────────────────────── -->
-    <main v-if="!isOpen" class="dashboard__body">
-      <div v-if="projects.status === 'error'" class="dashboard__error" role="alert">
-        <p class="dashboard__error-text">Could not load the project: {{ projects.error }}</p>
-        <button class="dashboard__error-retry" type="button" @click="openFromList(props.id, true)">Try again</button>
-      </div>
-      <div v-else-if="projects.status === 'ready' && !project" class="dashboard__lookup">
-        <p>Project not found.</p>
-        <RouterLink to="/">Back to projects</RouterLink>
-      </div>
-      <p v-else class="dashboard__lookup">Loading project…</p>
-    </main>
-
-    <!-- ── Main content ────────────────────────────────────────────────────── -->
-    <main v-else class="dashboard__body">
-
-      <!-- Processing status strip + Privacy Badge -->
-      <ProcessingStatus
-        :stage="store.processingStage"
-        :load-progress="store.loadProgress"
-        :progress-detail="store.processingDetail"
-        :used-fallback="store.usedFallback"
-        :started-at="store.processingStartedAt"
-        :allow-calibration-learning="!MOCK_MODE"
-      />
-
-      <!-- Transcript import placeholder: only shown when idle -->
-      <section v-if="isIdle" class="dashboard__section">
-        <div class="dashboard__import">
-          <p class="dashboard__import-text">Transcript import is coming soon.</p>
-          <button
-            v-if="MOCK_MODE"
-            class="dashboard__import-btn"
-            type="button"
-            @click="analyzeSampleTranscript"
-          >
-            Analyse sample transcript
-          </button>
-        </div>
-      </section>
-
-      <!-- Error state -->
-      <section v-if="store.processingStage === 'error'" class="dashboard__section">
-        <div class="dashboard__error" role="alert">
-          <svg class="dashboard__error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
-          </svg>
-          <p class="dashboard__error-text">{{ store.error }}</p>
-          <button class="dashboard__error-retry" type="button" @click="reset">
-            Try again
-          </button>
-        </div>
-      </section>
-      
-      
-      <!-- Results grid: stays visible after processing is done -->      
-      <section v-if="hasResults" class="dashboard__section">
-        <ResearchWorkbench :transcriptBlocks="store.currentProject?.segments ?? []" />
-      </section>
-
-      <!-- Empty state after successful processing with no results -->
-      <section
-        v-if="store.processingStage === 'done' && !hasResults"
-        class="dashboard__section"
+    <AppHeader>
+      <button
+        v-if="isOpen && store.currentProject"
+        class="dashboard__reset-btn"
+        type="button"
+        @click="reset"
       >
-        <div class="dashboard__empty">
-          <p>No outcomes could be extracted from this transcript.</p>
-          <p class="dashboard__empty-hint">Try a longer interview, or check the transcript in the store.</p>
-          <button class="dashboard__reset-btn" type="button" @click="reset">
-            Start over
-          </button>
-        </div>
-      </section>
+        ↺ Start over
+      </button>
+    </AppHeader>
 
+    <main class="dashboard__body">
+      <div class="dashboard__page-heading">
+        <RouterLink class="dashboard__back" to="/">← Projects</RouterLink>
+        <!-- The page's one <h1>: the Project name, or a generic label until it is known. -->
+        <h1 class="dashboard__title">{{ project?.name ?? 'Project' }}</h1>
+      </div>
+
+      <!-- ── Project lookup states ───────────────────────────────────────────── -->
+      <template v-if="!isOpen">
+        <div v-if="projects.status === 'error'" class="dashboard__error" role="alert">
+          <p class="dashboard__error-text">Could not load the project: {{ projects.error }}</p>
+          <button class="dashboard__error-retry" type="button" @click="openFromList(props.id, true)">Try again</button>
+        </div>
+        <div v-else-if="projects.status === 'ready' && !project" class="dashboard__lookup">
+          <p>Project not found.</p>
+          <RouterLink to="/">Back to projects</RouterLink>
+        </div>
+        <p v-else class="dashboard__lookup">Loading project…</p>
+      </template>
+
+      <!-- ── Main content ────────────────────────────────────────────────────── -->
+      <template v-else>
+
+        <!-- Processing status strip -->
+        <ProcessingStatus
+          :stage="store.processingStage"
+          :load-progress="store.loadProgress"
+          :progress-detail="store.processingDetail"
+          :used-fallback="store.usedFallback"
+          :started-at="store.processingStartedAt"
+          :allow-calibration-learning="!MOCK_MODE"
+        />
+
+        <!-- Transcript import placeholder: only shown when idle -->
+        <section v-if="isIdle" class="dashboard__section">
+          <div class="dashboard__import">
+            <p class="dashboard__import-text">Transcript import is coming soon.</p>
+            <button
+              v-if="MOCK_MODE"
+              class="dashboard__import-btn"
+              type="button"
+              @click="analyzeSampleTranscript"
+            >
+              Analyse sample transcript
+            </button>
+          </div>
+        </section>
+
+        <!-- Error state -->
+        <section v-if="store.processingStage === 'error'" class="dashboard__section">
+          <div class="dashboard__error" role="alert">
+            <svg class="dashboard__error-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+            </svg>
+            <p class="dashboard__error-text">{{ store.error }}</p>
+            <button class="dashboard__error-retry" type="button" @click="reset">
+              Try again
+            </button>
+          </div>
+        </section>
+
+
+        <!-- Results grid: stays visible after processing is done -->
+        <section v-if="hasResults" class="dashboard__section">
+          <ResearchWorkbench :transcriptBlocks="store.currentProject?.segments ?? []" />
+        </section>
+
+        <!-- Empty state after successful processing with no results -->
+        <section
+          v-if="store.processingStage === 'done' && !hasResults"
+          class="dashboard__section"
+        >
+          <div class="dashboard__empty">
+            <p>No outcomes could be extracted from this transcript.</p>
+            <p class="dashboard__empty-hint">Try a longer interview, or check the transcript in the store.</p>
+            <button class="dashboard__reset-btn" type="button" @click="reset">
+              Start over
+            </button>
+          </div>
+        </section>
+
+      </template>
     </main>
   </div>
-
-  <!-- Settings Dialog -->
-  <AppSettings :is-open="isSettingsOpen" @close="isSettingsOpen = false" />
 </template>
 
 <style scoped>
@@ -186,24 +164,10 @@ function reset(): void {
   grid-template-rows: auto 1fr;
 }
 
-/* ── Header ──────────────────────────────────────────────────────────────────── */
-.dashboard__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-6);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.dashboard__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
+/* ── Page heading ────────────────────────────────────────────────────────────── */
+.dashboard__page-heading {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .dashboard__back {
@@ -234,62 +198,11 @@ function reset(): void {
 }
 
 .dashboard__title {
-  font-size: var(--text-lg);
+  font-size: var(--text-2xl);
   font-weight: 700;
+  overflow-wrap: anywhere;
   letter-spacing: -0.03em;
   color: var(--color-text);
-}
-
-.dashboard__controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.dashboard__eta-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  user-select: none;
-}
-
-.dashboard__eta-checkbox {
-  accent-color: var(--color-accent);
-}
-
-.dashboard__eta-runs {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-
-.dashboard__eta-reset {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--color-text-muted);
-  transition:
-    border-color var(--duration-fast),
-    color var(--duration-fast);
-}
-
-.dashboard__eta-reset:hover:not(:disabled) {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
-}
-
-.dashboard__eta-reset:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .dashboard__mock-badge {
@@ -337,23 +250,6 @@ function reset(): void {
 .dashboard__reset-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-}
-
-.dashboard__settings-btn {
-  background: none;
-  border: none;
-  padding: var(--space-2);
-  border-radius: var(--radius-md);
-  color: var(--color-text-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dashboard__settings-btn:hover {
-  background: var(--color-surface-hover);
-  color: var(--color-text);
 }
 
 /* ── Body ────────────────────────────────────────────────────────────────────── */
