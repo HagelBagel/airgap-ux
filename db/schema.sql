@@ -155,6 +155,19 @@ CREATE TABLE public.participants (
 
 
 --
+-- Name: password_credentials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.password_credentials (
+    user_id uuid NOT NULL,
+    password_hash text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT password_hash_is_argon2id_check CHECK ((password_hash ~~ '$argon2id$%'::text))
+);
+
+
+--
 -- Name: projects; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -383,6 +396,14 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: password_credentials password_credentials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_credentials
+    ADD CONSTRAINT password_credentials_pkey PRIMARY KEY (user_id);
+
+
+--
 -- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -585,6 +606,13 @@ CREATE TRIGGER participants_set_updated_at BEFORE UPDATE ON public.participants 
 
 
 --
+-- Name: password_credentials password_credentials_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER password_credentials_set_updated_at BEFORE UPDATE ON public.password_credentials FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
 -- Name: projects projects_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -700,6 +728,14 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: password_credentials password_credentials_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_credentials
+    ADD CONSTRAINT password_credentials_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: projects projects_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -790,4 +826,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102160100'),
     ('20261102160200'),
     ('20261109132042'),
-    ('20261110133029');
+    ('20261110133029'),
+    ('20261123100911');
