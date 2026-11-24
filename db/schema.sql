@@ -155,6 +155,19 @@ CREATE TABLE public.participants (
 
 
 --
+-- Name: password_credentials; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.password_credentials (
+    user_id uuid NOT NULL,
+    password_hash text NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT password_hash_is_argon2id_check CHECK ((password_hash ~~ '$argon2id$%'::text))
+);
+
+
+--
 -- Name: projects; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -211,6 +224,20 @@ CREATE TABLE public.segments (
     CONSTRAINT segments_check1 CHECK (((start_time >= '00:00:00'::interval) AND (end_time >= start_time))),
     CONSTRAINT segments_check2 CHECK (((start_time IS NULL) = (end_time IS NULL))),
     CONSTRAINT segments_speaker_label_check CHECK ((speaker_label <> ''::text))
+);
+
+
+--
+-- Name: sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.sessions (
+    token_hash bytea NOT NULL,
+    user_id uuid NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    last_seen_at timestamp with time zone DEFAULT now() NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    CONSTRAINT sessions_token_hash_check CHECK ((octet_length(token_hash) = 32))
 );
 
 
@@ -383,6 +410,14 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: password_credentials password_credentials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_credentials
+    ADD CONSTRAINT password_credentials_pkey PRIMARY KEY (user_id);
+
+
+--
 -- Name: projects projects_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -428,6 +463,14 @@ ALTER TABLE ONLY public.segments
 
 ALTER TABLE ONLY public.segments
     ADD CONSTRAINT segments_transcript_id_ordinal_key UNIQUE (transcript_id, ordinal);
+
+
+--
+-- Name: sessions sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (token_hash);
 
 
 --
@@ -543,6 +586,13 @@ CREATE INDEX segments_participant_id_idx ON public.segments USING btree (partici
 
 
 --
+-- Name: sessions_user_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX sessions_user_id_idx ON public.sessions USING btree (user_id);
+
+
+--
 -- Name: transcripts_project_id_content_hash_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -582,6 +632,13 @@ CREATE TRIGGER outcome_ratings_set_updated_at BEFORE UPDATE ON public.outcome_ra
 --
 
 CREATE TRIGGER participants_set_updated_at BEFORE UPDATE ON public.participants FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
+--
+-- Name: password_credentials password_credentials_set_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER password_credentials_set_updated_at BEFORE UPDATE ON public.password_credentials FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 
 --
@@ -700,6 +757,14 @@ ALTER TABLE ONLY public.participants
 
 
 --
+-- Name: password_credentials password_credentials_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.password_credentials
+    ADD CONSTRAINT password_credentials_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
 -- Name: projects projects_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -737,6 +802,14 @@ ALTER TABLE ONLY public.segments
 
 ALTER TABLE ONLY public.segments
     ADD CONSTRAINT segments_transcript_id_project_id_fkey FOREIGN KEY (transcript_id, project_id) REFERENCES public.transcripts(id, project_id) ON DELETE CASCADE;
+
+
+--
+-- Name: sessions sessions_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.sessions
+    ADD CONSTRAINT sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
 
 --
@@ -790,4 +863,6 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20261102160100'),
     ('20261102160200'),
     ('20261109132042'),
-    ('20261110133029');
+    ('20261110133029'),
+    ('20261123100911'),
+    ('20261123101003');
