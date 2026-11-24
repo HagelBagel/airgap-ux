@@ -38,7 +38,7 @@ The constraints:
 | Table | Columns |
 |---|---|
 | `password_credentials` | `user_id` (primary key, → users, cascade), `password_hash`, `created_at`, `updated_at` |
-| `sessions` | `id`, `user_id` (→ users, cascade), `token_hash` (bytea, unique), `created_at`, `last_seen_at`, `expires_at` |
+| `sessions` | `user_id` (→ users, cascade), `token_hash` (bytea, primary key), `created_at`, `last_seen_at`, `expires_at` |
 
 The password hash lives in its own table, not on `users`, so a passkey table can sit next to it later without changing `users`, and a User row can be read without loading the hash.
 
